@@ -83,104 +83,9 @@ fun HomeScreen(
         }
     }
 
-    // Session summary dialog
-    state.sessionSummary?.let { summary ->
-        AlertDialog(
-            onDismissRequest = viewModel::summaryConsumed,
-            title = {
-                Text(
-                    text       = summary.title,
-                    fontWeight = FontWeight.Bold,
-                )
-            },
-            text = {
-                Column(
-                    modifier            = Modifier.verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    if (summary.died) {
-                        Text(
-                            text  = stringResource(R.string.home_died_message),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                        Spacer(Modifier.height(4.dp))
-                    }
-                    if (summary.boostWasActive) {
-                        Text(
-                            text  = stringResource(R.string.home_xp_boost_was_active),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Spacer(Modifier.height(4.dp))
-                    }
-                    if (summary.xpLines.isNotEmpty()) {
-                        SummarySection(stringResource(R.string.label_xp_gained))
-                        summary.xpLines.forEach { (skill, label) -> SummaryRow(skill, label) }
-                    } else if (summary.totalXpLabel.isNotEmpty()) {
-                        SummaryRow(stringResource(R.string.label_xp_gained), summary.totalXpLabel)
-                    }
-                    if (summary.killLines.isNotEmpty()) {
-                        Spacer(Modifier.height(4.dp))
-                        SummarySection(stringResource(R.string.label_kills))
-                        summary.killLines.forEach { (enemy, kills) -> SummaryRow(enemy, kills) }
-                    }
-                    if (summary.itemLines.isNotEmpty()) {
-                        Spacer(Modifier.height(4.dp))
-                        SummarySection(stringResource(R.string.home_loot))
-                        summary.itemLines.forEach { (item, qty) -> SummaryRow(item, qty) }
-                    }
-                    if (summary.coinsGained > 0) {
-                        SummaryRow("Coins", "+${summary.coinsGained.formatCoins()}")
-                    }
-                    if (summary.foodConsumedLines.isNotEmpty()) {
-                        Spacer(Modifier.height(4.dp))
-                        SummarySection(stringResource(R.string.home_food_consumed))
-                        summary.foodConsumedLines.forEach { (food, qty) -> SummaryRow(food, qty) }
-                    }
-                    if (summary.boneBuriedLabel.isNotEmpty()) {
-                        SummaryRow(stringResource(R.string.home_bones_buried), summary.boneBuriedLabel)
-                    }
-                }
-            },
-            confirmButton = {
-                Button(onClick = viewModel::summaryConsumed) {
-                    Text(stringResource(R.string.btn_close))
-                }
-            },
-        )
-    }
-
-    if (!state.isLoading && state.showWhatsNew) {
-        val context = LocalContext.current
-        val changelogText = remember {
-            runCatching { context.assets.open("changelog.txt").bufferedReader().readText().trim() }.getOrElse { "" }
-        }
-        if (changelogText.isNotEmpty()) {
-            AlertDialog(
-                onDismissRequest = viewModel::dismissWhatsNew,
-                title = { Text(stringResource(R.string.home_whats_new)) },
-                text  = {
-                    Text(
-                        text  = changelogText,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = viewModel::dismissWhatsNew) { Text(stringResource(R.string.home_got_it)) }
-                },
-            )
-        }
-    }
-
-    if (!state.isLoading && !state.characterSetupDone) {
-        CharacterSetupSheet(
-            isFirstTime = true,
-            onSave      = { name, gender, race -> viewModel.saveCharacterProfile(name, gender, race) },
-            onDismiss   = viewModel::dismissCharacterSetup,
-        )
-    }
+    // sessionSummary / showWhatsNew / characterSetup dialogs are hoisted to
+    // GlobalGameOverlay at AppNavigation root so they fire from any tab. See
+    // PR #9 sub-plan.
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -402,30 +307,6 @@ private fun QueueCard(
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-@Composable
-private fun SummarySection(title: String) {
-    Text(
-        text  = title,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
-
-@Composable
-private fun SummaryRow(label: String, value: String) {
-    Row(
-        modifier              = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        Text(
-            text       = value,
-            style      = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-    }
-}
 
 @Composable
 private fun StatItem(

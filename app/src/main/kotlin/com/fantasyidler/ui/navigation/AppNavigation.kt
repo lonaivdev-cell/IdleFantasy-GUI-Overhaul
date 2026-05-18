@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fantasyidler.ui.components.FantasyTopHud
+import com.fantasyidler.ui.components.GlobalGameOverlay
 import com.fantasyidler.ui.motion.FantasyMotion
 import com.fantasyidler.ui.screen.CombatScreen
 import com.fantasyidler.ui.screen.FarmingScreen
@@ -38,6 +39,7 @@ import com.fantasyidler.ui.screen.QuestsScreen
 import com.fantasyidler.ui.screen.SettingsScreen
 import com.fantasyidler.ui.screen.ShopScreen
 import com.fantasyidler.ui.screen.SkillsScreen
+import com.fantasyidler.ui.viewmodel.HomeViewModel
 import com.fantasyidler.ui.viewmodel.OnboardingViewModel
 import com.fantasyidler.ui.viewmodel.RootHudViewModel
 
@@ -68,6 +70,13 @@ fun AppNavigation() {
     val hudVm: RootHudViewModel = hiltViewModel()
     val hudState by hudVm.uiState.collectAsState()
 
+    // HomeViewModel is hoisted to the root scope so the four global flows it
+    // owns (sessionSummary dialog, what's-new dialog, character-setup sheet,
+    // session-collect trigger) fire from any tab. PR #9.5 renames this to
+    // GlobalGameViewModel and drops the now-unused dashboard fields.
+    val globalVm: HomeViewModel = hiltViewModel()
+    val globalState by globalVm.uiState.collectAsState()
+
     Scaffold(
         topBar = {
             if (showHud) {
@@ -84,10 +93,21 @@ fun AppNavigation() {
                     },
                     onShop     = { navController.navigate(Screen.Shop.route) },
                     onSession  = {
-                        navController.navigate(Screen.Skills.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
-                            restoreState    = true
+                        // If there's anything to claim, claim from any tab.
+                        // Otherwise navigate to Skills so the player can start
+                        // a session.
+                        val session = hudState.activeSession
+                        val canClaim = globalState.pendingCollectCount > 0 ||
+                                       (session != null && (session.completed ||
+                                        System.currentTimeMillis() >= session.endsAt))
+                        if (canClaim) {
+                            globalVm.collectSession()
+                        } else {
+                            navController.navigate(Screen.Skills.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState    = true
+                            }
                         }
                     },
                     onSettings = { navController.navigate(Screen.Settings.route) },
@@ -204,5 +224,19 @@ fun AppNavigation() {
                 ShopScreen(onBack = { if (navController.currentBackStackEntry == entry) navController.popBackStack() })
             }
         }
+
+        // Root-level overlay: dialogs/sheets that fire from any tab.
+        GlobalGameOverlay(
+            sessionSummary          = globalState.sessionSummary,
+            showWhatsNew            = globalState.showWhatsNew,
+            characterSetupDone      = globalState.characterSetupDone,
+            characterName           = globalState.characterName,
+            onSummaryConsumed       = globalVm::summaryConsumed,
+            onDismissWhatsNew       = globalVm::dismissWhatsNew,
+            onSaveCharacter         = { name, gender, race ->
+                globalVm.saveCharacterProfile(name, gender, race)
+            },
+            onDismissCharacterSetup = globalVm::dismissCharacterSetup,
+        )
     }
 }
