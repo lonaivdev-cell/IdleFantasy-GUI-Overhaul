@@ -98,7 +98,6 @@ fun ProfileScreen(
     )
 
     Scaffold(
-        topBar       = { TopAppBar(title = { Text(stringResource(R.string.nav_profile)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         if (state.isLoading) {

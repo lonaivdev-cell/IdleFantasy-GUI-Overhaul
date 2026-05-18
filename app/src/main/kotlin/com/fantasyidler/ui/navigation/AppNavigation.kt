@@ -27,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.fantasyidler.ui.components.FantasyTopHud
 import com.fantasyidler.ui.motion.FantasyMotion
 import com.fantasyidler.ui.screen.CombatScreen
 import com.fantasyidler.ui.screen.FarmingScreen
@@ -38,6 +39,7 @@ import com.fantasyidler.ui.screen.SettingsScreen
 import com.fantasyidler.ui.screen.ShopScreen
 import com.fantasyidler.ui.screen.SkillsScreen
 import com.fantasyidler.ui.viewmodel.OnboardingViewModel
+import com.fantasyidler.ui.viewmodel.RootHudViewModel
 
 @Composable
 fun AppNavigation() {
@@ -60,7 +62,38 @@ fun AppNavigation() {
         "skills" to setOf("farming"),
     )
 
+    val tabRoutes = Screen.bottomNavItems.map { it.route }.toSet()
+    val showHud = currentDestination?.route in tabRoutes
+
+    val hudVm: RootHudViewModel = hiltViewModel()
+    val hudState by hudVm.uiState.collectAsState()
+
     Scaffold(
+        topBar = {
+            if (showHud) {
+                FantasyTopHud(
+                    coins         = hudState.coins,
+                    combatLevel   = hudState.combatLevel,
+                    activeSession = hudState.activeSession,
+                    onProfile  = {
+                        navController.navigate(Screen.Profile.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState    = true
+                        }
+                    },
+                    onShop     = { navController.navigate(Screen.Shop.route) },
+                    onSession  = {
+                        navController.navigate(Screen.Skills.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState    = true
+                        }
+                    },
+                    onSettings = { navController.navigate(Screen.Settings.route) },
+                )
+            }
+        },
         bottomBar = {
             NavigationBar {
                 Screen.bottomNavItems.forEach { screen ->
