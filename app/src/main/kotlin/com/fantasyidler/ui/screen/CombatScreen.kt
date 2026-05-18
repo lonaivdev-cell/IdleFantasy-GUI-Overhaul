@@ -70,6 +70,8 @@ import com.fantasyidler.data.json.SpellData
 import com.fantasyidler.data.model.SessionFrame
 import com.fantasyidler.data.model.SkillSession
 import com.fantasyidler.data.model.Skills
+import com.fantasyidler.ui.components.DungeonCard
+import com.fantasyidler.ui.components.SectionHeader
 import com.fantasyidler.ui.theme.GoldPrimary
 import com.fantasyidler.ui.viewmodel.CombatSessionResult
 import com.fantasyidler.ui.viewmodel.CombatViewModel
@@ -301,16 +303,16 @@ private fun CombatSelectionList(
     val combatLvl = combatLevel(skillLevels)
 
     LazyColumn(modifier.fillMaxSize()) {
-        item { CombatSectionHeader(stringResource(R.string.label_dungeons_tab)) }
+        item { SectionHeader(stringResource(R.string.label_dungeons_tab), showDivider = false) }
         items(dungeons) { dungeon ->
-            DungeonRow(
+            DungeonCard(
                 dungeon        = dungeon,
                 unlocked       = combatLvl >= dungeon.recommendedLevel - UNLOCK_TOLERANCE,
                 survivalRating = survivalRatings[dungeon.name],
                 onTap          = { onDungeon(dungeon) },
             )
         }
-        item { CombatSectionHeader(stringResource(R.string.combat_solo_bosses)) }
+        item { SectionHeader(stringResource(R.string.combat_solo_bosses), showDivider = false) }
         items(bosses) { boss ->
             BossRow(
                 boss     = boss,
@@ -442,16 +444,6 @@ private fun CombatSkillRow(
 }
 
 @Composable
-private fun CombatSectionHeader(title: String) {
-    Text(
-        text     = title.uppercase(),
-        style    = MaterialTheme.typography.labelSmall,
-        color    = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-    )
-}
-
-@Composable
 private fun BossRow(
     boss: BossData,
     unlocked: Boolean,
@@ -493,61 +485,6 @@ private fun BossRow(
             style      = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
             color      = if (unlocked) GoldPrimary else dimColor,
-        )
-    }
-    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-}
-
-@Composable
-private fun DungeonRow(
-    dungeon: DungeonData,
-    unlocked: Boolean,
-    survivalRating: CombatSimulator.SurvivalRating? = null,
-    onTap: () -> Unit,
-) {
-    val dimColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = unlocked, onClick = onTap)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                text       = dungeon.displayName,
-                style      = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color      = if (unlocked) MaterialTheme.colorScheme.onSurface else dimColor,
-            )
-            Text(
-                text     = dungeon.description,
-                style    = MaterialTheme.typography.bodySmall,
-                color    = if (unlocked) MaterialTheme.colorScheme.onSurfaceVariant
-                           else dimColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            if (unlocked && survivalRating != null) {
-                val (ratingText, ratingColor) = when (survivalRating) {
-                    CombatSimulator.SurvivalRating.LIKELY   -> "Looks manageable" to MaterialTheme.colorScheme.primary
-                    CombatSimulator.SurvivalRating.RISKY    -> "Risky with current setup" to MaterialTheme.colorScheme.tertiary
-                    CombatSimulator.SurvivalRating.UNLIKELY -> "Likely to die" to MaterialTheme.colorScheme.error
-                }
-                Text(
-                    text  = ratingText,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = ratingColor,
-                )
-            }
-        }
-        Spacer(Modifier.width(12.dp))
-        Text(
-            text  = "Lv. ${dungeon.recommendedLevel}",
-            style = MaterialTheme.typography.labelMedium,
-            color = if (unlocked) GoldPrimary else dimColor,
-            fontWeight = FontWeight.SemiBold,
         )
     }
     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))

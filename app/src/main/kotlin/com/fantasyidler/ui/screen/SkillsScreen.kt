@@ -69,6 +69,8 @@ import com.fantasyidler.data.json.LogData
 import com.fantasyidler.data.json.OreData
 import com.fantasyidler.data.json.TreeData
 import com.fantasyidler.data.model.Skills
+import com.fantasyidler.ui.components.RecipeCard
+import com.fantasyidler.ui.components.SectionHeader
 import com.fantasyidler.ui.theme.GoldPrimary
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -483,23 +485,6 @@ private fun SkillRow(
                 )
             }
         }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Section header
-// ---------------------------------------------------------------------------
-
-@Composable
-private fun SectionHeader(title: String) {
-    Column {
-        HorizontalDivider()
-        Text(
-            text     = title.uppercase(Locale.getDefault()),
-            style    = MaterialTheme.typography.labelSmall,
-            color    = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
     }
 }
 
@@ -1504,10 +1489,9 @@ private fun CraftSkillSheet(
             }
             LazyColumn(Modifier.fillMaxWidth()) {
                 items(recipes) { recipe ->
-                    CraftRecipeRow(
+                    RecipeCard(
                         recipe     = recipe,
                         craftState = craftState,
-                        context    = context,
                         onTap      = { craftingViewModel.openRecipe(recipe) },
                     )
                 }
@@ -1515,106 +1499,6 @@ private fun CraftSkillSheet(
             }
         }
     }
-}
-
-@Composable
-private fun CraftRecipeRow(
-    recipe: CraftableRecipe,
-    craftState: CraftingUiState,
-    context: android.content.Context,
-    onTap: () -> Unit,
-) {
-    val meetsLvl = craftState.meetsLevel(recipe)
-    val canMake  = craftState.maxCraftable(recipe)
-    val enabled  = meetsLvl && canMake > 0
-    val dim      = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onTap)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                text       = recipe.displayName,
-                style      = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color      = if (enabled) MaterialTheme.colorScheme.onSurface else dim,
-            )
-            val matText = recipe.materials.entries.joinToString("  ") { (item, qty) ->
-                "${GameStrings.itemName(context, item)} ${craftState.inventory[item] ?: 0}/$qty"
-            }
-            Text(
-                text  = matText,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else dim,
-            )
-            val statParts = buildList {
-                if (recipe.outputAttackBonus   > 0) add("+${recipe.outputAttackBonus} Atk")
-                if (recipe.outputStrengthBonus > 0) add("+${recipe.outputStrengthBonus} Str")
-                if (recipe.outputDefenseBonus  > 0) add("+${recipe.outputDefenseBonus} Def")
-                if (recipe.outputHealingValue  > 0) add("Heals ${recipe.outputHealingValue} HP")
-                if (recipe.outputDamage        > 0) add("+${recipe.outputDamage} dmg")
-            }
-            if (statParts.isNotEmpty()) {
-                Text(
-                    text  = statParts.joinToString("  "),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else dim,
-                )
-            }
-            if (recipe.effects.isNotEmpty()) {
-                Text(
-                    text  = recipe.effects.entries.joinToString("  ") { (stat, bonus) ->
-                        "+$bonus ${stat.replaceFirstChar { it.uppercase() }}"
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (enabled) MaterialTheme.colorScheme.primary else dim,
-                )
-            }
-            if (recipe.outputRequirements.isNotEmpty()) {
-                recipe.outputRequirements.forEach { (skill, lvl) ->
-                    val have       = craftState.skillLevels[skill] ?: 1
-                    val skillLabel = GameStrings.skillName(context, skill)
-                    Text(
-                        text  = stringResource(R.string.skills_req_with_have, lvl, skillLabel, have, skillLabel),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (have >= lvl) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
-        }
-        Column(horizontalAlignment = Alignment.End) {
-            when {
-                !meetsLvl  -> Text(
-                    text  = "Lv. ${recipe.levelRequired}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = dim,
-                )
-                canMake > 0 -> {
-                    Text(
-                        text       = "×$canMake",
-                        style      = MaterialTheme.typography.labelMedium,
-                        color      = GoldPrimary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text  = "${recipe.xpPerItem.toInt()} XP",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                else -> Text(
-                    text  = "No mats",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = dim,
-                )
-            }
-        }
-    }
-    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 }
 
 @Composable
