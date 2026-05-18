@@ -57,6 +57,7 @@ fun FantasyIdlerTheme(
     MaterialTheme(
         colorScheme = if (useDark) DarkColorScheme else LightColorScheme,
         typography  = AppTypography,
+        shapes      = AppShapes,
         content     = content,
     )
 }
