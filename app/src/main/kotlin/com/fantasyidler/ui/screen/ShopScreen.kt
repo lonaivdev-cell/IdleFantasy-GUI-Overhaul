@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fantasyidler.R
+import com.fantasyidler.ui.components.SectionHeader
 import com.fantasyidler.ui.theme.GoldPrimary
 import com.fantasyidler.ui.viewmodel.ShopEntry
 import com.fantasyidler.ui.viewmodel.ShopTransaction
@@ -170,7 +171,7 @@ private fun BuyList(
 
     LazyColumn(Modifier.fillMaxSize()) {
         grouped.forEach { (category, categoryEntries) ->
-            item(key = "hdr_$category") { ShopSectionHeader(category) }
+            item(key = "hdr_$category") { SectionHeader(category) }
             items(categoryEntries, key = { it.key }) { entry ->
                 val canAfford  = coins >= entry.price
                 val isXpBoost  = entry.key == ShopViewModel.XP_BOOST_KEY
@@ -284,7 +285,7 @@ private fun SellList(
             }
         } else {
             grouped.forEach { (category, entries) ->
-                item(key = "sell_hdr_$category") { ShopSectionHeader(category) }
+                item(key = "sell_hdr_$category") { SectionHeader(category) }
                 items(entries, key = { it.key }) { (key, qty) ->
                     val sellPrice  = priceFor(key)
                     val isEquipped = equipped.values.any { it == key }
@@ -453,19 +454,3 @@ private fun TransactionSheet(
     }
 }
 
-// ---------------------------------------------------------------------------
-// Section header (buy list categories)
-// ---------------------------------------------------------------------------
-
-@Composable
-private fun ShopSectionHeader(title: String) {
-    Column {
-        HorizontalDivider()
-        Text(
-            text     = title.uppercase(),
-            style    = MaterialTheme.typography.labelSmall,
-            color    = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
-    }
-}

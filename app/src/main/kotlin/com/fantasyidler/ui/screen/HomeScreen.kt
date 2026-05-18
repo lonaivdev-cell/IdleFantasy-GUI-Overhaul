@@ -53,6 +53,7 @@ import com.fantasyidler.BuildConfig
 import com.fantasyidler.R
 import com.fantasyidler.data.model.QueuedAction
 import com.fantasyidler.data.model.SkillSession
+import com.fantasyidler.ui.components.ActiveSessionPill
 import com.fantasyidler.ui.theme.GoldPrimary
 import com.fantasyidler.ui.viewmodel.HomeViewModel
 import com.fantasyidler.ui.viewmodel.SessionSummary
@@ -297,9 +298,8 @@ fun HomeScreen(
                         viewModel.onSessionExpiredLocally(session.sessionId)
                     }
                 }
-                HomeSessionCard(
+                ActiveSessionPill(
                     session       = session,
-                    context       = context,
                     onAbandon     = viewModel::abandonSession,
                     onDebugFinish = viewModel::debugFinishSession,
                 )
@@ -344,94 +344,6 @@ fun HomeScreen(
                     context  = context,
                     onRemove = viewModel::removeFromQueue,
                 )
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Session card
-// ---------------------------------------------------------------------------
-
-@Composable
-private fun HomeSessionCard(
-    session: SkillSession,
-    context: android.content.Context,
-    onAbandon: () -> Unit,
-    onDebugFinish: () -> Unit,
-) {
-    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    val endsAt = session.endsAt
-    LaunchedEffect(endsAt) {
-        while (System.currentTimeMillis() < endsAt) {
-            now = System.currentTimeMillis()
-            delay(1_000L)
-        }
-        now = System.currentTimeMillis()
-    }
-
-    val isDone = session.completed || now >= endsAt
-
-    val skillLabel = when (session.skillName) {
-        "combat" -> context.getString(R.string.label_combat)
-        else     -> GameStrings.skillName(context, session.skillName)
-    }
-    val skillEmoji = GameStrings.skillEmoji(session.skillName)
-    val activityLabel = session.activityKey
-        .replace('_', ' ')
-        .replaceFirstChar { it.uppercase() }
-        .takeIf { session.activityKey.isNotEmpty() }
-
-    Surface(
-        shape  = RoundedCornerShape(16.dp),
-        color  = if (isDone) MaterialTheme.colorScheme.primaryContainer
-                 else MaterialTheme.colorScheme.secondaryContainer,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Text(
-                text  = if (isDone) stringResource(R.string.label_session_complete)
-                        else stringResource(R.string.label_session_active),
-                style = MaterialTheme.typography.labelMedium,
-                color = if (isDone) MaterialTheme.colorScheme.onPrimaryContainer
-                        else MaterialTheme.colorScheme.onSecondaryContainer,
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = buildString {
-                    append("$skillEmoji $skillLabel")
-                    if (activityLabel != null) append(" — $activityLabel")
-                },
-                style      = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color      = if (isDone) MaterialTheme.colorScheme.onPrimaryContainer
-                             else MaterialTheme.colorScheme.onSecondaryContainer,
-            )
-
-            if (!isDone) {
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text  = remember(now) { endsAt.toCountdown() },
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                )
-            }
-
-            Spacer(Modifier.height(12.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-            Spacer(Modifier.height(8.dp))
-
-            Row {
-                OutlinedButton(onClick = onAbandon) {
-                    Text(stringResource(R.string.btn_abandon))
-                }
-                if (BuildConfig.DEBUG && !isDone) {
-                    Spacer(Modifier.width(8.dp))
-                    TextButton(onClick = onDebugFinish) {
-                        Text("[Debug] Finish Now")
-                    }
-                }
             }
         }
     }

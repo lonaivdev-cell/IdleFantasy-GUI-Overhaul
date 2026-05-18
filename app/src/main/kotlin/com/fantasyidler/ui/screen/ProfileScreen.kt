@@ -59,6 +59,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.fantasyidler.R
 import com.fantasyidler.data.json.CookingRecipe
 import com.fantasyidler.data.model.EquipSlot
+import com.fantasyidler.ui.components.CoinsBadge
+import com.fantasyidler.ui.components.SectionHeader
 import com.fantasyidler.ui.theme.GoldPrimary
 import com.fantasyidler.ui.viewmodel.Achievement
 import com.fantasyidler.ui.viewmodel.AchievementsViewModel
@@ -67,7 +69,6 @@ import com.fantasyidler.ui.viewmodel.InventoryViewModel
 import com.fantasyidler.ui.viewmodel.slotDisplayName
 import com.fantasyidler.ui.viewmodel.xpProgressFraction
 import com.fantasyidler.util.GameStrings
-import com.fantasyidler.util.formatCoins
 import com.fantasyidler.util.formatXp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,7 +113,7 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            CoinsBanner(state.coins)
+            CoinsBadge(state.coins)
 
             // ── Character identity header ────────────────────────────────
             Surface(
@@ -243,36 +244,6 @@ fun ProfileScreen(
         )
     }
 
-}
-
-// ---------------------------------------------------------------------------
-// Coins banner (also used by SkillsScreen result sheet)
-// ---------------------------------------------------------------------------
-
-@Composable
-fun CoinsBanner(coins: Long) {
-    Surface(
-        color    = GoldPrimary.copy(alpha = 0.15f),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text  = stringResource(R.string.label_coins),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text       = coins.formatCoins(),
-                style      = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color      = GoldPrimary,
-            )
-        }
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -424,7 +395,7 @@ private fun AchievementsTab(
             }
         }
         byGroup.forEach { (group, achievements) ->
-            item(key = "hdr_$group") { SlotSectionHeader(group) }
+            item(key = "hdr_$group") { SectionHeader(group) }
             items(achievements, key = { it.id }) { ach ->
                 AchievementRow(ach)
             }
@@ -501,13 +472,13 @@ private fun PetsTab(
         val locked = allPets.values.filter { it.id !in ownedPetIds }
 
         if (owned.isNotEmpty()) {
-            item { SlotSectionHeader(stringResource(R.string.profile_pet_collected)) }
+            item { SectionHeader(stringResource(R.string.profile_pet_collected)) }
             items(owned, key = { it.id }) { pet ->
                 PetRow(pet = pet, owned = true)
             }
         }
         if (locked.isNotEmpty()) {
-            item { SlotSectionHeader(stringResource(R.string.profile_pet_not_found)) }
+            item { SectionHeader(stringResource(R.string.profile_pet_not_found)) }
             items(locked, key = { it.id }) { pet ->
                 PetRow(pet = pet, owned = false)
             }
@@ -595,7 +566,7 @@ private fun EquipmentTab(
                 Text(stringResource(R.string.profile_equip_best))
             }
         }
-        item { SlotSectionHeader(stringResource(R.string.profile_combat_gear)) }
+        item { SectionHeader(stringResource(R.string.profile_combat_gear)) }
         items(EquipSlot.COMBAT_SLOTS) { slot ->
             val xpLabel = if (slot == EquipSlot.WEAPON)
                 weaponXpLabel(allEquipment[equipped[slot]]?.combatStyle, context)
@@ -608,7 +579,7 @@ private fun EquipmentTab(
                 onUnequip  = { onUnequip(slot) },
             )
         }
-        item { SlotSectionHeader(stringResource(R.string.profile_gathering_tools)) }
+        item { SectionHeader(stringResource(R.string.profile_gathering_tools)) }
         items(EquipSlot.TOOL_SLOTS) { slot ->
             EquipSlotRow(
                 slotName   = slotDisplayName(slot),
@@ -617,7 +588,7 @@ private fun EquipmentTab(
                 onUnequip  = { onUnequip(slot) },
             )
         }
-        item { SlotSectionHeader(stringResource(R.string.profile_food_dungeon)) }
+        item { SectionHeader(stringResource(R.string.profile_food_dungeon)) }
         if (foodInInventory.isEmpty()) {
             item {
                 Text(
@@ -683,19 +654,6 @@ private fun FoodRow(
         }
     }
     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-}
-
-@Composable
-private fun SlotSectionHeader(title: String) {
-    Column {
-        HorizontalDivider()
-        Text(
-            text     = title.uppercase(),
-            style    = MaterialTheme.typography.labelSmall,
-            color    = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
-    }
 }
 
 @Composable
