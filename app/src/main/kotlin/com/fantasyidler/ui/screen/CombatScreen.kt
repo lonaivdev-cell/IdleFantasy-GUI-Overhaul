@@ -101,22 +101,6 @@ fun CombatScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title   = { Text(stringResource(R.string.nav_combat)) },
-                actions = {
-                    if (!state.isLoading) {
-                        Text(
-                            text       = "${stringResource(R.string.combat_level_label)} ${combatLevelFrom(state.skillLevels)}",
-                            style      = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color      = GoldPrimary,
-                            modifier   = Modifier.padding(end = 16.dp),
-                        )
-                    }
-                },
-            )
-        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         if (state.isLoading) {

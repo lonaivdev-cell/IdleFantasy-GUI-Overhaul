@@ -77,7 +77,6 @@ fun QuestsScreen(
     }
 
     Scaffold(
-        topBar       = { TopAppBar(title = { Text(stringResource(R.string.nav_quests)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         if (state.isLoading) {
