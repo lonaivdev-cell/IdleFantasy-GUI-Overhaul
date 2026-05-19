@@ -10,20 +10,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -32,6 +28,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,15 +42,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.ui.unit.dp
 import com.fantasyidler.R
-import com.fantasyidler.ui.components.BigStepper
-import com.fantasyidler.ui.components.ChunkyCard
-import com.fantasyidler.ui.components.ClaimBadge
-import com.fantasyidler.ui.components.EntityIconDisk
+import com.fantasyidler.ui.components.EmptyState
 import com.fantasyidler.ui.components.SectionHeader
-import com.fantasyidler.ui.theme.GoldPrimary
+import com.fantasyidler.ui.components.foundation.BigStepper
+import com.fantasyidler.ui.components.foundation.ChunkyButton
+import com.fantasyidler.ui.components.foundation.ChunkyButtonVariant
+import com.fantasyidler.ui.components.foundation.ChunkyCard
+import com.fantasyidler.ui.components.foundation.ChunkySheet
+import com.fantasyidler.ui.components.foundation.ClaimBadge
+import com.fantasyidler.ui.components.foundation.EntityIconDisk
+import com.fantasyidler.ui.theme.fantasy.FantasyPreviewSurface
+import com.fantasyidler.ui.theme.fantasy.LocalFantasyTokens
 import com.fantasyidler.ui.viewmodel.ShopEntry
 import com.fantasyidler.ui.viewmodel.ShopTransaction
 import com.fantasyidler.ui.viewmodel.ShopViewModel
@@ -65,6 +67,7 @@ fun ShopScreen(
     onBack: () -> Unit,
     viewModel: ShopViewModel = hiltViewModel(),
 ) {
+    val tokens            = LocalFantasyTokens.current
     val state             by viewModel.uiState.collectAsState()
     val context           = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -79,12 +82,25 @@ fun ShopScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.label_shop)) },
+                title = {
+                    Text(
+                        text  = stringResource(R.string.label_shop),
+                        style = tokens.typography.titleLarge,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(
+                            imageVector        = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.btn_back),
+                            tint               = tokens.colors.primary,
+                        )
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor   = tokens.colors.surface,
+                    titleContentColor = tokens.colors.onSurface,
+                ),
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -96,21 +112,10 @@ fun ShopScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            TabRow(selectedTabIndex = subTab) {
-                Tab(
-                    selected = subTab == 0,
-                    onClick  = { subTab = 0 },
-                    text     = { Text(stringResource(R.string.btn_buy)) },
-                )
-                Tab(
-                    selected = subTab == 1,
-                    onClick  = { subTab = 1 },
-                    text     = { Text(stringResource(R.string.btn_sell)) },
-                )
-            }
-
-            when (subTab) {
-                0 -> BuyList(
+            ShopTabRow(subTab) { subTab = it }
+            when {
+                state.isLoading -> ShopLoading()
+                subTab == 0 -> BuyList(
                     entries       = viewModel.buyEntries,
                     coins         = state.coins,
                     xpBoostActive = state.xpBoostActive,
@@ -132,10 +137,9 @@ fun ShopScreen(
 
     state.transaction?.let { t ->
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        ModalBottomSheet(
+        ChunkySheet(
             onDismissRequest = viewModel::dismissTransaction,
             sheetState       = sheetState,
-            dragHandle       = { BottomSheetDefaults.DragHandle() },
         ) {
             TransactionSheet(
                 transaction = t,
@@ -145,6 +149,31 @@ fun ShopScreen(
                 onDismiss   = viewModel::dismissTransaction,
             )
         }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tabs
+// ---------------------------------------------------------------------------
+
+@Composable
+private fun ShopTabRow(selected: Int, onSelect: (Int) -> Unit) {
+    val tokens = LocalFantasyTokens.current
+    TabRow(
+        selectedTabIndex = selected,
+        containerColor   = tokens.colors.surface,
+        contentColor     = tokens.colors.primary,
+    ) {
+        Tab(
+            selected = selected == 0,
+            onClick  = { onSelect(0) },
+            text     = { Text(stringResource(R.string.btn_buy),  style = tokens.typography.labelSmall) },
+        )
+        Tab(
+            selected = selected == 1,
+            onClick  = { onSelect(1) },
+            text     = { Text(stringResource(R.string.btn_sell), style = tokens.typography.labelSmall) },
+        )
     }
 }
 
@@ -159,63 +188,84 @@ private fun BuyList(
     xpBoostActive: Boolean,
     onBuy: (ShopEntry) -> Unit,
 ) {
+    val tokens  = LocalFantasyTokens.current
     val grouped = remember(entries) { entries.groupBy { it.categoryName } }
+
+    if (entries.isEmpty()) {
+        ShopEmpty(
+            title = stringResource(R.string.shop_empty_buy_title),
+            desc  = stringResource(R.string.shop_empty_buy_desc),
+        )
+        return
+    }
 
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
-        contentPadding      = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding      = PaddingValues(horizontal = tokens.spacing.l, vertical = tokens.spacing.m + tokens.spacing.s),
+        verticalArrangement = Arrangement.spacedBy(tokens.spacing.m + tokens.spacing.xs),
     ) {
         grouped.forEach { (category, categoryEntries) ->
             item(key = "hdr_$category") {
-                Box(modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)) {
+                Box(modifier = Modifier.padding(top = tokens.spacing.s, bottom = tokens.spacing.xs)) {
                     SectionHeader(category)
                 }
             }
             items(categoryEntries, key = { it.key }) { entry ->
-                val canAfford  = coins >= entry.price
-                val isXpBoost  = entry.key == ShopViewModel.XP_BOOST_KEY
-                val isActiveBoost = isXpBoost && xpBoostActive
-
-                ChunkyCard(
-                    onClick = { onBuy(entry) },
-                    enabled = true,
-                    highlight = isActiveBoost,
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        EntityIconDisk(entityId = entry.key, contentDescription = entry.displayName, size = 44.dp)
-                        Spacer(Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text       = entry.displayName,
-                                    style      = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color      = if (canAfford) MaterialTheme.colorScheme.onSurface
-                                                 else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                                )
-                                if (isActiveBoost) {
-                                    Spacer(Modifier.width(6.dp))
-                                    ClaimBadge(text = stringResource(R.string.shop_active), pulse = true)
-                                }
-                            }
-                            if (entry.description.isNotBlank()) {
-                                Text(
-                                    text  = entry.description,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                        alpha = if (canAfford) 1f else 0.5f,
-                                    ),
-                                )
-                            }
-                        }
-                        Spacer(Modifier.width(8.dp))
-                        PricePill(price = entry.price.toLong(), enabled = canAfford)
-                    }
-                }
+                BuyRow(entry = entry, coins = coins, xpBoostActive = xpBoostActive, onBuy = onBuy)
             }
         }
-        item { Spacer(Modifier.height(16.dp)) }
+        item { Spacer(Modifier.height(tokens.spacing.l)) }
+    }
+}
+
+@Composable
+private fun BuyRow(
+    entry: ShopEntry,
+    coins: Long,
+    xpBoostActive: Boolean,
+    onBuy: (ShopEntry) -> Unit,
+) {
+    val tokens        = LocalFantasyTokens.current
+    val canAfford     = coins >= entry.price
+    val isXpBoost     = entry.key == ShopViewModel.XP_BOOST_KEY
+    val isActiveBoost = isXpBoost && xpBoostActive
+    val dimColor      = tokens.colors.onSurface.copy(alpha = 0.38f)
+
+    ChunkyCard(
+        onClick   = { onBuy(entry) },
+        highlight = isActiveBoost,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            EntityIconDisk(
+                entityId           = entry.key,
+                contentDescription = entry.displayName,
+                size               = tokens.spacing.xxl + tokens.spacing.m + tokens.spacing.xs,
+            )
+            Spacer(Modifier.width(tokens.spacing.m + tokens.spacing.s))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text       = entry.displayName,
+                        style      = tokens.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color      = if (canAfford) tokens.colors.onSurface else dimColor,
+                    )
+                    if (isActiveBoost) {
+                        Spacer(Modifier.width(tokens.spacing.s + tokens.spacing.xs))
+                        ClaimBadge(text = stringResource(R.string.shop_active), pulse = true)
+                    }
+                }
+                if (entry.description.isNotBlank()) {
+                    Text(
+                        text  = entry.description,
+                        style = tokens.typography.bodyMedium,
+                        color = tokens.colors.onSurfaceMuted.copy(alpha = if (canAfford) 1f else 0.5f),
+                    )
+                }
+            }
+            Spacer(Modifier.width(tokens.spacing.m))
+            PricePill(price = entry.price.toLong(), enabled = canAfford)
+        }
     }
 }
 
@@ -236,6 +286,7 @@ private fun SellList(
     onSellJunk: () -> Unit,
     onSellOldEquipment: () -> Unit,
 ) {
+    val tokens  = LocalFantasyTokens.current
     val grouped = remember(inventory) {
         inventory.entries
             .groupBy { categoryFor(it.key) }
@@ -245,100 +296,106 @@ private fun SellList(
 
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
-        contentPadding      = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding      = PaddingValues(horizontal = tokens.spacing.l, vertical = tokens.spacing.m + tokens.spacing.s),
+        verticalArrangement = Arrangement.spacedBy(tokens.spacing.m + tokens.spacing.xs),
     ) {
         item {
             Row(
                 modifier              = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(tokens.spacing.m),
             ) {
-                OutlinedButton(
+                ChunkyButton(
+                    text     = stringResource(R.string.shop_sell_junk),
                     onClick  = onSellJunk,
+                    variant  = ChunkyButtonVariant.Secondary,
                     modifier = Modifier.weight(1f),
-                ) { Text(stringResource(R.string.shop_sell_junk)) }
-                OutlinedButton(
+                )
+                ChunkyButton(
+                    text     = stringResource(R.string.shop_sell_old_gear),
                     onClick  = onSellOldEquipment,
+                    variant  = ChunkyButtonVariant.Secondary,
                     modifier = Modifier.weight(1f),
-                ) { Text(stringResource(R.string.shop_sell_old_gear)) }
+                )
             }
         }
         if (inventory.isEmpty()) {
             item {
-                Box(
-                    modifier         = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text  = stringResource(R.string.label_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                ShopEmpty(
+                    title = stringResource(R.string.shop_empty_sell_title),
+                    desc  = stringResource(R.string.shop_empty_sell_desc),
+                )
             }
         } else {
             grouped.forEach { (category, entries) ->
                 item(key = "sell_hdr_$category") {
-                    Box(modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)) {
+                    Box(modifier = Modifier.padding(top = tokens.spacing.s, bottom = tokens.spacing.xs)) {
                         SectionHeader(category)
                     }
                 }
                 items(entries, key = { it.key }) { (key, qty) ->
-                    val sellPrice  = priceFor(key)
-                    val isEquipped = equipped.values.any { it == key }
+                    val sellPrice   = priceFor(key)
+                    val isEquipped  = equipped.values.any { it == key }
                     val displayName = GameStrings.itemName(context, key)
 
                     ChunkyCard(onClick = { onSell(key) }) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            EntityIconDisk(entityId = key, contentDescription = displayName, size = 44.dp)
-                            Spacer(Modifier.width(12.dp))
+                            EntityIconDisk(
+                                entityId           = key,
+                                contentDescription = displayName,
+                                size               = tokens.spacing.xxl + tokens.spacing.m + tokens.spacing.xs,
+                            )
+                            Spacer(Modifier.width(tokens.spacing.m + tokens.spacing.s))
                             Column(modifier = Modifier.weight(1f)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
                                         text       = displayName,
-                                        style      = MaterialTheme.typography.titleMedium,
+                                        style      = tokens.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
+                                        color      = tokens.colors.onSurface,
                                     )
                                     if (isEquipped) {
-                                        Spacer(Modifier.width(6.dp))
+                                        Spacer(Modifier.width(tokens.spacing.s + tokens.spacing.xs))
                                         Text(
                                             text  = stringResource(R.string.shop_equipped_label),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            style = tokens.typography.labelSmall,
+                                            color = tokens.colors.onSurfaceMuted,
                                         )
                                     }
                                 }
                                 Text(
                                     text  = stringResource(R.string.shop_qty_in_inv, qty),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = tokens.typography.bodyMedium,
+                                    color = tokens.colors.onSurfaceMuted,
                                 )
                             }
-                            Spacer(Modifier.width(8.dp))
+                            Spacer(Modifier.width(tokens.spacing.m))
                             PricePill(price = sellPrice.toLong(), enabled = true)
                         }
                     }
                 }
             }
         }
-        item { Spacer(Modifier.height(16.dp)) }
+        item { Spacer(Modifier.height(tokens.spacing.l)) }
     }
 }
 
+// ---------------------------------------------------------------------------
+// Price pill
+// ---------------------------------------------------------------------------
+
 @Composable
 private fun PricePill(price: Long, enabled: Boolean) {
+    val tokens = LocalFantasyTokens.current
     Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = GoldPrimary.copy(alpha = if (enabled) 0.20f else 0.08f),
+        shape = tokens.shapes.chip,
+        color = tokens.colors.primary.copy(alpha = if (enabled) 0.20f else 0.08f),
     ) {
         Text(
             text       = "$price",
-            modifier   = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-            style      = MaterialTheme.typography.labelLarge,
+            modifier   = Modifier.padding(horizontal = tokens.spacing.m + tokens.spacing.xs, vertical = tokens.spacing.s),
+            style      = tokens.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color      = if (enabled) GoldPrimary else GoldPrimary.copy(alpha = 0.5f),
+            color      = if (enabled) tokens.colors.primary else tokens.colors.primary.copy(alpha = 0.5f),
         )
     }
 }
@@ -355,36 +412,37 @@ private fun TransactionSheet(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val qty   = transaction.qty
-    val total = transaction.priceEach.toLong() * qty
+    val tokens = LocalFantasyTokens.current
+    val qty    = transaction.qty
+    val total  = transaction.priceEach.toLong() * qty
     val maxQty = transaction.maxQty.coerceAtLeast(1)
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .padding(bottom = 40.dp),
+            .padding(bottom = tokens.spacing.xxl),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         EntityIconDisk(
-            entityId = transaction.key,
+            entityId           = transaction.key,
             contentDescription = transaction.displayName,
-            size = 72.dp,
+            size               = tokens.spacing.xxl + tokens.spacing.xxl + tokens.spacing.m,
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(tokens.spacing.m + tokens.spacing.s))
         Text(
             text       = if (transaction.isBuy) stringResource(R.string.shop_buy_prefix, transaction.displayName)
                          else stringResource(R.string.shop_sell_prefix, transaction.displayName),
-            style      = MaterialTheme.typography.titleLarge,
+            style      = tokens.typography.titleLarge,
             fontWeight = FontWeight.Bold,
+            color      = tokens.colors.onSurface,
         )
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(tokens.spacing.xs))
         Text(
             text  = stringResource(R.string.shop_price_each_long, transaction.priceEach.toString()),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = tokens.typography.bodyMedium,
+            color = tokens.colors.onSurfaceMuted,
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(tokens.spacing.l + tokens.spacing.s))
 
         if (maxQty > 1) {
             BigStepper(
@@ -394,7 +452,7 @@ private fun TransactionSheet(
                 maxValue      = maxQty,
                 onMax         = { onSetQty(maxQty) },
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(tokens.spacing.l))
         }
 
         Row(
@@ -403,39 +461,131 @@ private fun TransactionSheet(
             verticalAlignment     = Alignment.CenterVertically,
         ) {
             Text(
-                text  = if (transaction.isBuy) stringResource(R.string.shop_total_cost) else stringResource(R.string.shop_youll_receive),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text  = if (transaction.isBuy) stringResource(R.string.shop_total_cost)
+                        else stringResource(R.string.shop_youll_receive),
+                style = tokens.typography.bodyMedium,
+                color = tokens.colors.onSurfaceMuted,
             )
             PricePill(price = total, enabled = !transaction.isBuy || coins >= total)
         }
 
         if (transaction.isBuy && coins < total) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(tokens.spacing.m))
             Text(
                 text  = stringResource(R.string.error_not_enough_coins),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
+                style = tokens.typography.bodyMedium,
+                color = tokens.colors.error,
             )
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(tokens.spacing.l + tokens.spacing.s))
 
         Row(
             modifier              = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(tokens.spacing.m + tokens.spacing.s),
         ) {
-            OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.btn_cancel))
-            }
-            Button(
-                onClick  = onConfirm,
+            ChunkyButton(
+                text     = stringResource(R.string.btn_cancel),
+                onClick  = onDismiss,
+                variant  = ChunkyButtonVariant.Secondary,
                 modifier = Modifier.weight(1f),
+            )
+            ChunkyButton(
+                text     = if (transaction.isBuy) stringResource(R.string.btn_buy)
+                           else stringResource(R.string.btn_sell),
+                onClick  = onConfirm,
+                variant  = ChunkyButtonVariant.Primary,
                 enabled  = !transaction.isBuy || coins >= total,
-            ) {
-                Text(if (transaction.isBuy) stringResource(R.string.btn_buy)
-                     else stringResource(R.string.btn_sell))
-            }
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// State containers
+// ---------------------------------------------------------------------------
+
+@Composable
+private fun ShopLoading() {
+    val tokens = LocalFantasyTokens.current
+    Box(
+        modifier         = Modifier.fillMaxSize().padding(tokens.spacing.xl),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(color = tokens.colors.primary)
+    }
+}
+
+@Composable
+private fun ShopEmpty(title: String, desc: String) {
+    EmptyState(title = title, description = desc)
+}
+
+@Composable
+private fun ShopError(message: String) {
+    val tokens = LocalFantasyTokens.current
+    Surface(
+        color    = tokens.colors.error.copy(alpha = 0.12f),
+        shape    = tokens.shapes.card,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(tokens.spacing.l),
+    ) {
+        Column(
+            modifier            = Modifier.padding(tokens.spacing.l),
+            verticalArrangement = Arrangement.spacedBy(tokens.spacing.s),
+        ) {
+            Text(
+                text       = stringResource(R.string.shop_error_title),
+                style      = tokens.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color      = tokens.colors.error,
+            )
+            Text(
+                text  = message,
+                style = tokens.typography.bodyMedium,
+                color = tokens.colors.onSurface,
+            )
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Previews
+// ---------------------------------------------------------------------------
+
+@PreviewLightDark
+@Composable
+private fun PreviewShopLoading() {
+    FantasyPreviewSurface {
+        Box(modifier = Modifier.size(LocalFantasyTokens.current.spacing.xxl * 6)) {
+            ShopLoading()
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewShopEmpty() {
+    FantasyPreviewSurface {
+        ShopEmpty(title = "Inventory empty", desc = "Train to fill it.")
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewShopError() {
+    FantasyPreviewSurface { ShopError("Network unreachable.") }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewPricePill() {
+    FantasyPreviewSurface {
+        Row(horizontalArrangement = Arrangement.spacedBy(LocalFantasyTokens.current.spacing.m)) {
+            PricePill(price = 250, enabled = true)
+            PricePill(price = 999, enabled = false)
         }
     }
 }

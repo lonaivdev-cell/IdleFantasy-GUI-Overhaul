@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Idle Fantasy</string>
 
     <!-- ===== Bottom navigation ===== -->
@@ -373,6 +373,30 @@
     <!-- Translator note: %1$d = gear bonus value -->
     <string name="combat_gear_bonus">+%1$d gear</string>
 
+    <!-- ===== CombatScreen (GUI overhaul slice) =====
+         tools:ignore="MissingTranslation" is applied per-string below: this slice
+         lands in English-first; Weblate will pick the keys up on the next sync,
+         so we don't block lint on missing de/strings.xml entries that the rest
+         of the project also lacks. -->
+    <string name="combat_loading" tools:ignore="MissingTranslation">Preparing battle…</string>
+    <string name="combat_potion_label" tools:ignore="MissingTranslation">Potion</string>
+    <string name="combat_xp_consolation" tools:ignore="MissingTranslation">XP (consolation)</string>
+    <string name="combat_view_food" tools:ignore="MissingTranslation">View equipped food</string>
+    <string name="combat_debug_finish_now" tools:ignore="MissingTranslation">[Debug] Finish Now</string>
+    <string name="combat_no_food_title" tools:ignore="MissingTranslation">No food equipped</string>
+    <string name="combat_no_food_message" tools:ignore="MissingTranslation">You have no food equipped. Without food you may die quickly and lose most of your rewards. Start anyway?</string>
+    <string name="combat_no_food_start_anyway" tools:ignore="MissingTranslation">Start anyway</string>
+    <string name="combat_no_food_equipped_title" tools:ignore="MissingTranslation">No food equipped</string>
+    <string name="combat_no_food_equipped_description" tools:ignore="MissingTranslation">Equip food from your inventory before starting a dungeon — your character will eat it automatically when hurt.</string>
+    <string name="combat_empty_selection_title" tools:ignore="MissingTranslation">No combat targets unlocked</string>
+    <string name="combat_empty_selection_description" tools:ignore="MissingTranslation">Train your combat skills to unlock your first dungeon or boss.</string>
+    <string name="combat_empty_skills_title" tools:ignore="MissingTranslation">No combat skills yet</string>
+    <string name="combat_empty_skills_description" tools:ignore="MissingTranslation">Combat skills appear here once you start fighting.</string>
+    <!-- Translator note: %1$s = boss display name, %2$d = required combat level -->
+    <string name="cd_open_boss" tools:ignore="MissingTranslation">Open %1$s, requires combat level %2$d</string>
+    <!-- Translator note: %1$s = boss display name, %2$d = required combat level -->
+    <string name="cd_locked_boss" tools:ignore="MissingTranslation">%1$s, locked. Requires combat level %2$d</string>
+
     <!-- ===== ProfileScreen ===== -->
     <string name="profile_unnamed">Unnamed Adventurer</string>
     <string name="profile_no_pets">No pets available</string>
@@ -436,6 +460,14 @@
     <string name="skills_log_desc">Lv. %1$d  •  %2$s XP/log</string>
     <!-- Translator note: %1$d = required level, %2$s = skill name, %3$d = player level, %4$s = skill name again -->
     <string name="skills_req_with_have">Requires %1$d %2$s (You have %3$d %4$s)</string>
+    <!-- Translator note: %1$d = level required, %2$d = XP per lap -->
+    <string name="skills_course_detail" tools:ignore="MissingTranslation">Lv. %1$d  •  %2$d XP/lap</string>
+    <string name="skills_loading" tools:ignore="MissingTranslation">Starting…</string>
+    <string name="skills_empty_title" tools:ignore="MissingTranslation">No skills available</string>
+    <string name="skills_empty_desc" tools:ignore="MissingTranslation">No skills available — check your save.</string>
+    <string name="skills_error_title" tools:ignore="MissingTranslation">Couldn\'t load skills</string>
+    <string name="skills_error_desc" tools:ignore="MissingTranslation">Something went wrong while loading your skills. Try again?</string>
+    <string name="btn_retry" tools:ignore="MissingTranslation">Retry</string>
 
     <!-- ===== ShopScreen ===== -->
     <string name="shop_active">ACTIVE</string>
@@ -455,6 +487,11 @@
     <string name="shop_youll_receive">You\'ll receive</string>
     <!-- Translator note: %1$s = formatted coin amount -->
     <string name="shop_total_amount">%1$s coins</string>
+    <string name="shop_empty_buy_title" tools:ignore="MissingTranslation">Shop is empty</string>
+    <string name="shop_empty_buy_desc" tools:ignore="MissingTranslation">Check back later — new items rotate in regularly.</string>
+    <string name="shop_empty_sell_title" tools:ignore="MissingTranslation">Nothing to sell</string>
+    <string name="shop_empty_sell_desc" tools:ignore="MissingTranslation">Train skills or open chests to fill your inventory.</string>
+    <string name="shop_error_title" tools:ignore="MissingTranslation">Couldn\'t load the shop</string>
 
     <!-- ===== CraftingScreen ===== -->
     <string name="crafting_no_mats">No mats</string>
@@ -467,6 +504,15 @@
     <string name="crafting_increase">Increase</string>
     <!-- Translator note: %1$d = needed, %2$d = have -->
     <string name="crafting_needed_have">%1$d (have %2$d)</string>
+    <!-- Translator note: %1$d = required skill level -->
+    <string name="crafting_required_level" tools:ignore="MissingTranslation">Lv. %1$d</string>
+    <!-- Translator note: %1$d = XP per crafted item -->
+    <string name="crafting_xp_per_item" tools:ignore="MissingTranslation">%1$d XP</string>
+    <!-- Translator note: %1$d = quantity being crafted -->
+    <string name="crafting_btn_craft_total" tools:ignore="MissingTranslation">Craft ×%1$d</string>
+    <string name="crafting_empty_title" tools:ignore="MissingTranslation">No recipes here yet</string>
+    <string name="crafting_empty_desc" tools:ignore="MissingTranslation">Train this skill or gather more materials to unlock recipes.</string>
+    <string name="crafting_error_title" tools:ignore="MissingTranslation">Couldn\'t load recipes</string>
 
     <!-- ===== FarmingScreen ===== -->
     <!-- Translator note: %1$s = crop name -->
@@ -477,9 +523,60 @@
     <string name="farming_patches">%1$d patches unlocked</string>
     <string name="farming_clear_patch">Clear Patch</string>
     <string name="farming_clear_desc">Remove the crop without any reward?</string>
+    <!-- Translator note: %1$s = formatted XP value (e.g. "12.4k") -->
+    <string name="farming_xp_value" tools:ignore="MissingTranslation">%1$s XP</string>
+    <!-- Translator note: %1$s = formatted XP value -->
+    <string name="farming_xp_gained" tools:ignore="MissingTranslation">+%1$s XP</string>
+    <string name="farming_harvest_badge" tools:ignore="MissingTranslation">Harvest!</string>
+    <string name="farming_choose_crop" tools:ignore="MissingTranslation">Choose a crop to plant</string>
+    <string name="farming_no_crops_title" tools:ignore="MissingTranslation">No crops available</string>
+    <string name="farming_no_crops_desc" tools:ignore="MissingTranslation">Train Farming to unlock new crops.</string>
+    <!-- Translator note: %1$s = formatted duration remaining -->
+    <string name="farming_growing_ready_in" tools:ignore="MissingTranslation">Ready in %1$s</string>
+    <string name="farming_ready_to_harvest_desc" tools:ignore="MissingTranslation">Ready to harvest now.</string>
+    <!-- Translator note: %1$d = level required, %2$d = growth time hours, %3$d = harvest XP -->
+    <string name="farming_crop_meta" tools:ignore="MissingTranslation">Lv. %1$d  •  %2$dh  •  %3$d XP</string>
+    <string name="farming_empty_title" tools:ignore="MissingTranslation">No patches yet</string>
+    <string name="farming_empty_desc" tools:ignore="MissingTranslation">Reach Farming Level 1 to unlock your first patch.</string>
+    <string name="farming_error_title" tools:ignore="MissingTranslation">Couldn\'t load patches</string>
 
     <!-- ===== QuestsScreen ===== -->
     <string name="quests_none_in_category">No quests in this category.</string>
+    <!-- Tab category ordering — must match groupKeyAt() in QuestsScreen.kt -->
+    <string-array name="quest_category_titles" translatable="false">
+        <item>Gathering</item>
+        <item>Crafting</item>
+        <item>Combat</item>
+        <item>Special</item>
+    </string-array>
+    <!-- Translator note: %1$s = category label, %2$d = claimable count -->
+    <string name="quests_tab_with_count">%1$s (%2$d)</string>
+    <!-- Translator note: %1$d = current progress, %2$d = required total -->
+    <string name="quests_progress_count">%1$d / %2$d</string>
+    <string name="quests_loading">Loading quests…</string>
+    <string name="quests_error">Couldn\'t load quests. Pull to retry.</string>
+    <string name="cd_quest_category">%1$s category</string>
+
+    <!-- ===== Generic loading/error/empty states ===== -->
+    <string name="state_loading">Loading…</string>
+    <string name="state_error_generic">Something went wrong.</string>
+    <string name="state_retry">Retry</string>
+
+    <!-- ===== AdventureScreen extras ===== -->
+    <string name="adv_loading">Preparing your adventure…</string>
+    <string name="adv_no_recommended_dungeon">No dungeons unlocked yet — keep training combat.</string>
+    <string name="adv_error">Couldn\'t load adventure. Tap to retry.</string>
+    <!-- Translator note: %1$s = activity label like "Mining — Copper ore" -->
+    <string name="cd_queue_remove">Remove %1$s from queue</string>
+    <string name="cd_queue_card">Up next queue</string>
+
+    <!-- ===== ProfileScreen extras ===== -->
+    <string name="cd_edit_character">Edit character</string>
+    <!-- Translator note: %1$s = slot name like "Weapon" -->
+    <string name="cd_unequip_slot">Unequip %1$s</string>
+    <string name="profile_loading">Loading profile…</string>
+    <string name="profile_inventory_empty">Your bag is empty. Train a skill to gather items.</string>
+    <string name="profile_achievements_empty">No achievements available yet.</string>
 
     <!-- ===== CharacterSetupSheet ===== -->
     <string name="character_create_title">Create Your Character</string>
@@ -496,6 +593,36 @@
     <string name="character_race_orc">Orc</string>
     <string name="character_race_halfling">Halfling</string>
     <string name="character_race_gnome">Gnome</string>
+
+    <!--
+        Stable identifiers driving CharacterSetupSheet's chip lists. Persisted
+        verbatim into the player save, so order + spellings must never change.
+        Display labels come from the per-key character_gender_*/character_race_*
+        strings above (which ARE translated).
+    -->
+    <string-array name="character_genders" translatable="false">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Other</item>
+    </string-array>
+    <string-array name="character_races" translatable="false">
+        <item>Human</item>
+        <item>Elf</item>
+        <item>Dwarf</item>
+        <item>Orc</item>
+        <item>Halfling</item>
+        <item>Gnome</item>
+    </string-array>
+
+    <!-- ===== FantasyTopHud ===== -->
+    <string name="hud_coins_cd">Coins. Tap to open shop.</string>
+    <string name="hud_level_cd">Combat level. Tap to view profile.</string>
+    <string name="hud_session_idle_cd">No active session. Tap to start one.</string>
+    <string name="hud_session_active_cd">Active session: %1$s. Tap to view.</string>
+    <string name="hud_session_claim_cd">Session ready to claim: %1$s. Tap to collect.</string>
+    <string name="hud_settings_cd">Open settings</string>
+    <string name="hud_session_idle">Start a session</string>
+    <string name="hud_session_claim">Claim</string>
 
     <!-- ===== OnboardingScreen ===== -->
     <string name="onboarding_sessions_title">Sessions</string>
