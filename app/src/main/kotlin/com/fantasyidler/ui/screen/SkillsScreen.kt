@@ -42,14 +42,16 @@ import com.fantasyidler.util.GameStrings
 
 /**
  * Top-level Skills screen. Pure orchestrator: collects [com.fantasyidler.ui.viewmodel.SkillsUiState],
- * iterates the gathering + prayer skill ladder, and mounts the matching
- * extracted sheet from [com.fantasyidler.ui.screen.skills] when an activity
- * picker is open. Inline composables live under that subpackage; this file
- * stays state → list dispatch only.
+ * iterates the gathering + crafting + combat skill ladder, and mounts the
+ * matching extracted sheet from [com.fantasyidler.ui.screen.skills] when an
+ * activity picker is open. Crafting and non-prayer combat rows are read-only
+ * level cards that redirect to the dedicated Crafting / Combat tabs on tap.
  */
 @Composable
 fun SkillsScreen(
     onNavigateToFarming: () -> Unit = {},
+    onNavigateToCrafting: () -> Unit = {},
+    onNavigateToCombat: () -> Unit = {},
     viewModel: SkillsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -84,8 +86,13 @@ fun SkillsScreen(
                 state               = state,
                 paddingValues       = padding,
                 onSkillTap          = { key ->
-                    if (key == Skills.FARMING) onNavigateToFarming()
-                    else viewModel.onSkillTapped(key)
+                    when {
+                        key == Skills.FARMING            -> onNavigateToFarming()
+                        key in Skills.CRAFTING_SKILLS    -> onNavigateToCrafting()
+                        key == Skills.PRAYER             -> viewModel.onSkillTapped(key)
+                        key in Skills.COMBAT             -> onNavigateToCombat()
+                        else                             -> viewModel.onSkillTapped(key)
+                    }
                 },
                 onCollect           = viewModel::collectSession,
                 onAbandon           = viewModel::abandonSession,
@@ -231,16 +238,29 @@ private fun SkillsList(
             )
         }
 
-        item(key = "section-prayer") {
-            SectionHeader(stringResource(R.string.label_prayer))
+        item(key = "section-crafting") {
+            SectionHeader(stringResource(R.string.label_crafting_skills))
         }
-        item(key = Skills.PRAYER) {
+        items(items = Skills.CRAFTING_SKILLS, key = { it }) { key ->
             SkillRow(
-                skillKey = Skills.PRAYER,
-                level    = state.skillLevels[Skills.PRAYER] ?: 1,
-                xp       = state.skillXp[Skills.PRAYER] ?: 0L,
-                isActive = state.activeSession?.skillName == Skills.PRAYER && state.activeSession?.completed == false,
-                onClick  = { onSkillTap(Skills.PRAYER) },
+                skillKey = key,
+                level    = state.skillLevels[key] ?: 1,
+                xp       = state.skillXp[key] ?: 0L,
+                isActive = state.activeSession?.skillName == key && state.activeSession?.completed == false,
+                onClick  = { onSkillTap(key) },
+            )
+        }
+
+        item(key = "section-combat") {
+            SectionHeader(stringResource(R.string.label_combat))
+        }
+        items(items = Skills.COMBAT, key = { it }) { key ->
+            SkillRow(
+                skillKey = key,
+                level    = state.skillLevels[key] ?: 1,
+                xp       = state.skillXp[key] ?: 0L,
+                isActive = state.activeSession?.skillName == key && state.activeSession?.completed == false,
+                onClick  = { onSkillTap(key) },
             )
         }
     }
