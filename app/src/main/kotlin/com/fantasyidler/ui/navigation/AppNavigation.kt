@@ -190,7 +190,23 @@ fun AppNavigation() {
             popExitTransition  = FantasyMotion.NavPopExit,
         ) {
             composable(Screen.Skills.route)   {
-                SkillsScreen(onNavigateToFarming = { navController.navigate(Screen.Farming.route) })
+                SkillsScreen(
+                    onNavigateToFarming  = { navController.navigate(Screen.Farming.route) },
+                    onNavigateToCrafting = {
+                        navController.navigate(Screen.Crafting.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState    = true
+                        }
+                    },
+                    onNavigateToCombat = {
+                        navController.navigate(Screen.Combat.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState    = true
+                        }
+                    },
+                )
             }
             composable(
                 route = Screen.Farming.route,
