@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Idle Fantasy</string>
 
     <!-- ===== Bottom navigation ===== -->
@@ -455,6 +455,11 @@
     <string name="shop_youll_receive">You\'ll receive</string>
     <!-- Translator note: %1$s = formatted coin amount -->
     <string name="shop_total_amount">%1$s coins</string>
+    <string name="shop_empty_buy_title" tools:ignore="MissingTranslation">Shop is empty</string>
+    <string name="shop_empty_buy_desc" tools:ignore="MissingTranslation">Check back later — new items rotate in regularly.</string>
+    <string name="shop_empty_sell_title" tools:ignore="MissingTranslation">Nothing to sell</string>
+    <string name="shop_empty_sell_desc" tools:ignore="MissingTranslation">Train skills or open chests to fill your inventory.</string>
+    <string name="shop_error_title" tools:ignore="MissingTranslation">Couldn\'t load the shop</string>
 
     <!-- ===== CraftingScreen ===== -->
     <string name="crafting_no_mats">No mats</string>
@@ -467,6 +472,15 @@
     <string name="crafting_increase">Increase</string>
     <!-- Translator note: %1$d = needed, %2$d = have -->
     <string name="crafting_needed_have">%1$d (have %2$d)</string>
+    <!-- Translator note: %1$d = required skill level -->
+    <string name="crafting_required_level" tools:ignore="MissingTranslation">Lv. %1$d</string>
+    <!-- Translator note: %1$d = XP per crafted item -->
+    <string name="crafting_xp_per_item" tools:ignore="MissingTranslation">%1$d XP</string>
+    <!-- Translator note: %1$d = quantity being crafted -->
+    <string name="crafting_btn_craft_total" tools:ignore="MissingTranslation">Craft ×%1$d</string>
+    <string name="crafting_empty_title" tools:ignore="MissingTranslation">No recipes here yet</string>
+    <string name="crafting_empty_desc" tools:ignore="MissingTranslation">Train this skill or gather more materials to unlock recipes.</string>
+    <string name="crafting_error_title" tools:ignore="MissingTranslation">Couldn\'t load recipes</string>
 
     <!-- ===== FarmingScreen ===== -->
     <!-- Translator note: %1$s = crop name -->
@@ -477,6 +491,22 @@
     <string name="farming_patches">%1$d patches unlocked</string>
     <string name="farming_clear_patch">Clear Patch</string>
     <string name="farming_clear_desc">Remove the crop without any reward?</string>
+    <!-- Translator note: %1$s = formatted XP value (e.g. "12.4k") -->
+    <string name="farming_xp_value" tools:ignore="MissingTranslation">%1$s XP</string>
+    <!-- Translator note: %1$s = formatted XP value -->
+    <string name="farming_xp_gained" tools:ignore="MissingTranslation">+%1$s XP</string>
+    <string name="farming_harvest_badge" tools:ignore="MissingTranslation">Harvest!</string>
+    <string name="farming_choose_crop" tools:ignore="MissingTranslation">Choose a crop to plant</string>
+    <string name="farming_no_crops_title" tools:ignore="MissingTranslation">No crops available</string>
+    <string name="farming_no_crops_desc" tools:ignore="MissingTranslation">Train Farming to unlock new crops.</string>
+    <!-- Translator note: %1$s = formatted duration remaining -->
+    <string name="farming_growing_ready_in" tools:ignore="MissingTranslation">Ready in %1$s</string>
+    <string name="farming_ready_to_harvest_desc" tools:ignore="MissingTranslation">Ready to harvest now.</string>
+    <!-- Translator note: %1$d = level required, %2$d = growth time hours, %3$d = harvest XP -->
+    <string name="farming_crop_meta" tools:ignore="MissingTranslation">Lv. %1$d  •  %2$dh  •  %3$d XP</string>
+    <string name="farming_empty_title" tools:ignore="MissingTranslation">No patches yet</string>
+    <string name="farming_empty_desc" tools:ignore="MissingTranslation">Reach Farming Level 1 to unlock your first patch.</string>
+    <string name="farming_error_title" tools:ignore="MissingTranslation">Couldn\'t load patches</string>
 
     <!-- ===== QuestsScreen ===== -->
     <string name="quests_none_in_category">No quests in this category.</string>
