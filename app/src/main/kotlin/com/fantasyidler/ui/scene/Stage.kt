@@ -5,6 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -68,20 +74,69 @@ private fun LayerBox(layer: Layer) {
     if (!layer.visible || layer.entityId == null) return
 
     val alignment = layer.position.toAlignment()
+    val transition = rememberInfiniteTransition(label = "idle_${layer.tag}")
+
+    val rotation: Float = when (layer.idleBehavior) {
+        IdleBehavior.Swing -> transition.animateFloat(
+            initialValue = -8f,
+            targetValue = 8f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 450, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "swing",
+        ).value
+        IdleBehavior.Wobble -> transition.animateFloat(
+            initialValue = -4f,
+            targetValue = 4f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 350, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "wobble",
+        ).value
+        else -> 0f
+    }
+
+    val translationY: Float = when (layer.idleBehavior) {
+        IdleBehavior.Bob -> transition.animateFloat(
+            initialValue = 0f,
+            targetValue = -8f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 600, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "bob",
+        ).value
+        else -> 0f
+    }
+
+    val scale: Float = when (layer.idleBehavior) {
+        IdleBehavior.Breath -> transition.animateFloat(
+            initialValue = 1f,
+            targetValue = 1.04f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 900, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "breath",
+        ).value
+        else -> 1f
+    }
+
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, placeable.height) {
-                    placeable.place(IntOffset.Zero)
-                }
-            },
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = alignment,
     ) {
         EntityIcon(
             entityId = layer.entityId,
             size = 88.dp,
+            modifier = Modifier.graphicsLayer(
+                rotationZ = rotation,
+                translationY = translationY,
+                scaleX = scale,
+                scaleY = scale,
+            ),
         )
     }
 }
