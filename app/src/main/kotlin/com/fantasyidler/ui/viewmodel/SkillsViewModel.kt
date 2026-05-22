@@ -67,6 +67,8 @@ data class SkillsUiState(
     val woodcuttingEfficiency: Float = 1.0f,
     val fishingEfficiency: Float = 1.0f,
     val sessionDurationMs: Long = 0L,
+    /** Entity id of the currently-equipped pickaxe, or "bronze_pickaxe" if nothing is equipped. */
+    val equippedPickaxeId: String = "bronze_pickaxe",
 )
 
 sealed class SheetState {
@@ -132,6 +134,7 @@ class SkillsViewModel @Inject constructor(
                 woodcuttingEfficiency = toolEfficiency(equipped[EquipSlot.AXE],         EquipSlot.AXE,         0),
                 fishingEfficiency     = toolEfficiency(equipped[EquipSlot.FISHING_ROD], EquipSlot.FISHING_ROD, 0),
                 sessionDurationMs     = SkillSimulator.sessionDurationMs(levels[Skills.AGILITY] ?: 1),
+                equippedPickaxeId     = equipped[EquipSlot.PICKAXE] ?: "bronze_pickaxe",
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SkillsUiState())
@@ -675,6 +678,26 @@ class SkillsViewModel @Inject constructor(
     private fun petDropParams(skillKey: String): Pair<String?, Double> {
         val pet = gameData.pets.values.firstOrNull { it.boostedSkill == skillKey } ?: return null to 0.0
         return pet.id to (1.0 / 1000.0)
+    }
+
+    /**
+     * Returns the per-minute item-id lists for the currently active mining session,
+     * in simulation order (up to 60 entries). Each inner list is the set of item keys
+     * produced in that minute (may be empty for dry minutes).
+     *
+     * Used by [SessionSceneSheet] to drive the scene animation.
+     */
+    fun currentMiningFrames(): List<List<String>> {
+        val session = uiState.value.activeSession ?: return emptyList()
+        if (session.skillName != Skills.MINING) return emptyList()
+        val frames: List<SessionFrame> = try {
+            json.decodeFromString(session.frames)
+        } catch (_: Exception) {
+            return emptyList()
+        }
+        return frames.map { frame ->
+            frame.items.flatMap { (key, qty) -> List(qty) { key } }
+        }
     }
 
     /**

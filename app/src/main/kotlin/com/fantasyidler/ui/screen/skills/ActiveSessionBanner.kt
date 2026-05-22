@@ -1,5 +1,8 @@
 package com.fantasyidler.ui.screen.skills
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -44,6 +47,7 @@ fun ActiveSessionBanner(
     onCollect: () -> Unit,
     onAbandon: () -> Unit,
     onDebugFinish: () -> Unit = {},
+    onTapHero: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val tokens = LocalFantasyTokens.current
@@ -69,11 +73,18 @@ fun ActiveSessionBanner(
         title    = title,
         subtitle = if (completed) stringResource(R.string.label_session_complete) else countdownLabel,
         leading  = {
-            IconDisk(
-                emoji      = skillEmoji.ifEmpty { "✨" },
-                size       = tokens.spacing.xxl + tokens.spacing.xl,
-                background = tokens.colors.primary.copy(alpha = 0.30f),
-            )
+            Box(
+                modifier = if (onTapHero != null) Modifier.clickable(
+                    onClickLabel = "View mining animation",
+                    role = Role.Button,
+                ) { onTapHero() } else Modifier,
+            ) {
+                IconDisk(
+                    emoji      = skillEmoji.ifEmpty { "✨" },
+                    size       = tokens.spacing.xxl + tokens.spacing.xl,
+                    background = tokens.colors.primary.copy(alpha = 0.30f),
+                )
+            }
         },
         trailing = if (completed) {
             { ClaimBadge(text = collectLabel) }

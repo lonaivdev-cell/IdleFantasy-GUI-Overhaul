@@ -38,6 +38,8 @@ import androidx.compose.ui.res.stringResource
 import com.fantasyidler.R
 import com.fantasyidler.ui.viewmodel.SheetState
 import com.fantasyidler.ui.viewmodel.SkillsViewModel
+import com.fantasyidler.ui.scene.SceneCatalog
+import com.fantasyidler.ui.scene.SessionSceneSheet
 import com.fantasyidler.util.GameStrings
 
 /**
@@ -58,6 +60,7 @@ fun SkillsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     var errorDismissed by remember { mutableStateOf(false) }
+    var miningSceneOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.snackbarMessage) {
         state.snackbarMessage?.let {
@@ -97,6 +100,7 @@ fun SkillsScreen(
                 onCollect           = viewModel::collectSession,
                 onAbandon           = viewModel::abandonSession,
                 onDebugFinish       = viewModel::debugFinishSession,
+                onTapMiningHero     = { miningSceneOpen = true },
             )
         }
     }
@@ -186,6 +190,31 @@ fun SkillsScreen(
             SheetState.ComingSoon  -> ComingSoonSheet(onDismissRequest = onDismiss)
         }
     }
+
+    // Tap-to-expand mining scene sheet — only when a mining session is active.
+    val activeMiningSession = state.activeSession?.takeIf { it.skillName == Skills.MINING }
+    if (activeMiningSession != null && miningSceneOpen) {
+        val pickaxeId = state.equippedPickaxeId
+        val oreNodeId = "${activeMiningSession.activityKey}_node"
+        val frames = remember(activeMiningSession.sessionId) { viewModel.currentMiningFrames() }
+
+        SessionSceneSheet(
+            config = SceneCatalog.mining(pickaxeId = pickaxeId, oreNodeId = oreNodeId),
+            framesFlow = { onFrame ->
+                for (items in frames) {
+                    onFrame(items, 60_000L)
+                }
+            },
+            open = miningSceneOpen,
+            onDismiss = { miningSceneOpen = false },
+            statsContent = {
+                androidx.compose.material3.Text(
+                    text = "${GameStrings.skillName(context, Skills.MINING)} — ${activeMiningSession.activityKey.replace('_', ' ')}",
+                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                )
+            },
+        )
+    }
 }
 
 @Composable
@@ -196,6 +225,7 @@ private fun SkillsList(
     onCollect: () -> Unit,
     onAbandon: () -> Unit,
     onDebugFinish: () -> Unit,
+    onTapMiningHero: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
 
@@ -214,6 +244,7 @@ private fun SkillsList(
                     onCollect     = onCollect,
                     onAbandon     = onAbandon,
                     onDebugFinish = onDebugFinish,
+                    onTapHero     = if (session.skillName == Skills.MINING) onTapMiningHero else null,
                 )
             }
         }
