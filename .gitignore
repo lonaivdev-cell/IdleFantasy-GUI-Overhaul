@@ -23,3 +23,6 @@ art/pipeline/staging/**
 __pycache__/
 *.pyc
 
+
+# Brainstorming mockups
+.superpowers/
