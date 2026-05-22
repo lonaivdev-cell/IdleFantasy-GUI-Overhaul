@@ -109,56 +109,64 @@ private fun LayerBox(layer: Layer, shake: Effect.Shake? = null) {
     val alignment = layer.position.toAlignment()
     val transition = rememberInfiniteTransition(label = "idle_${layer.tag}")
 
+    val swingAngle = transition.animateFloat(
+        initialValue = -8f, targetValue = 8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 450, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ), label = "swing",
+    ).value
+    val wobbleAngle = transition.animateFloat(
+        initialValue = -4f, targetValue = 4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 350, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ), label = "wobble",
+    ).value
+    val bobY = transition.animateFloat(
+        initialValue = 0f, targetValue = -8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 600, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ), label = "bob",
+    ).value
+    val breathScale = transition.animateFloat(
+        initialValue = 1f, targetValue = 1.04f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 900, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ), label = "breath",
+    ).value
+
     val rotation: Float = when (layer.idleBehavior) {
-        IdleBehavior.Swing -> transition.animateFloat(
-            initialValue = -8f, targetValue = 8f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 450, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse,
-            ), label = "swing",
-        ).value
-        IdleBehavior.Wobble -> transition.animateFloat(
-            initialValue = -4f, targetValue = 4f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 350, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse,
-            ), label = "wobble",
-        ).value
+        IdleBehavior.Swing -> swingAngle
+        IdleBehavior.Wobble -> wobbleAngle
         else -> 0f
     }
 
     val translationY: Float = when (layer.idleBehavior) {
-        IdleBehavior.Bob -> transition.animateFloat(
-            initialValue = 0f, targetValue = -8f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 600, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse,
-            ), label = "bob",
-        ).value
+        IdleBehavior.Bob -> bobY
         else -> 0f
     }
 
     val scale: Float = when (layer.idleBehavior) {
-        IdleBehavior.Breath -> transition.animateFloat(
-            initialValue = 1f, targetValue = 1.04f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 900, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse,
-            ), label = "breath",
-        ).value
+        IdleBehavior.Breath -> breathScale
         else -> 1f
     }
 
     // Shake overlay on top of idle rotation/translation.
+    val shakeTransition = rememberInfiniteTransition(label = "shake_${layer.tag}")
+    val shakeOffsetRaw = shakeTransition.animateFloat(
+        initialValue = -ShakeMagnitude.Small.dp,
+        targetValue = ShakeMagnitude.Small.dp,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 60, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "shake",
+    ).value
     val shakeOffset: Float = if (shake != null) {
-        val shakeTransition = rememberInfiniteTransition(label = "shake_${layer.tag}")
-        shakeTransition.animateFloat(
-            initialValue = -shake.magnitude.dp, targetValue = shake.magnitude.dp,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 60, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse,
-            ), label = "shake",
-        ).value
+        shakeOffsetRaw * (shake.magnitude.dp / ShakeMagnitude.Small.dp)
     } else 0f
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = alignment) {

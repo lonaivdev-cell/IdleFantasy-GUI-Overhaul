@@ -695,7 +695,9 @@ class SkillsViewModel @Inject constructor(
         } catch (_: Exception) {
             return emptyList()
         }
-        return frames.map { frame -> frame.items.keys.toList() }
+        return frames.map { frame ->
+            frame.items.flatMap { (key, qty) -> List(qty) { key } }
+        }
     }
 
     /**
