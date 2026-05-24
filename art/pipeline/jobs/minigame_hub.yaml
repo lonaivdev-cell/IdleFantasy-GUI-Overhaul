@@ -1,0 +1,546 @@
+# Minigame Hub — 51 entries
+# Run:  python3 -m art.pipeline.ai.run --jobs art/pipeline/jobs/minigame_hub.yaml
+#
+# Covers the full market-center asset set: 1 background, 5 stations, 6 decor,
+# 12 player frames (4-dir walk + idle), 2 joystick parts, 1 vendor NPC, and
+# 24 minigame props across smithing / runecrafting / herblore / cooking.
+#
+# Per-job pixelize.target_size differs by sprite kind so the in-world scale
+# is sensible: player 32px, decor/props 48px, sword & runic close-ups 64px,
+# joystick base 96px, stations 128px, plaza background 512px.
+#
+# Seeds: 4001–4051 (mining uses 1001+; this block leaves room to grow).
+# All prompts follow the locked style:
+#   "pixel art, 16-bit RPG <kind> of <SUBJECT>, <DETAIL>, plain white
+#    background, top-down 3/4 view, crisp pixels, no shadows".
+
+defaults:
+  width: 1024
+  height: 1024
+  steps: 25
+  cfg: 7.0
+  lora_scale: 1.0
+  sampler: dpmpp_2m_karras
+  negative: >-
+    blurry, photo, smooth, anti-aliased, gradient, 3d render, low quality,
+    signature, watermark, text, painted, oil painting, realistic, modern,
+    futuristic, neon
+  pixelize:
+    target_size: 48
+    palette_size: 16
+  bg_model: birefnet-general
+
+jobs:
+  # ------------------------------------------------------------------
+  # Background — full-screen ground plate, large pixelize target.
+  # Prompt fills the frame edge-to-edge so bg-removal leaves it opaque.
+  # ------------------------------------------------------------------
+  - entity_id: plaza_floor
+    seed: 4001
+    prompt: >-
+      pixel art, 16-bit RPG top-down ground texture of a medieval market
+      plaza, warm sandy cobblestone pavers with patches of dirt and grass
+      between the stones, hint of straw and footprints, earth tones, edge
+      to edge with no border, no characters, no buildings, no props, crisp
+      pixels, no shadows
+    pixelize:
+      target_size: 512
+      palette_size: 24
+
+  # ------------------------------------------------------------------
+  # Stations — buildings/structures, larger pixelize target.
+  # ------------------------------------------------------------------
+  - entity_id: smithy
+    seed: 4002
+    prompt: >-
+      pixel art, 16-bit RPG building, small medieval blacksmith's smithy
+      with a stone forge, glowing orange coals visible inside, anvil out
+      front on packed dirt, sloped wooden plank roof, brick chimney with
+      a wisp of smoke, plain white background, top-down 3/4 view, crisp
+      pixels, no shadows
+    pixelize:
+      target_size: 128
+      palette_size: 16
+
+  - entity_id: runic_outcrop
+    seed: 4003
+    prompt: >-
+      pixel art, 16-bit RPG scene element, tall jagged grey runestone
+      monolith carved with faintly glowing violet runes, standing on a
+      mossy circular stone altar slab with cracks, ancient and arcane,
+      plain white background, top-down 3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 128
+      palette_size: 16
+
+  - entity_id: herbalist_cart
+    seed: 4004
+    prompt: >-
+      pixel art, 16-bit RPG building, wheeled wooden herbalist's cart with
+      a striped green awning, a black iron cauldron bubbling green liquid
+      on a small stove beside it, jars and dried herbs hanging from the
+      awning posts, plain white background, top-down 3/4 view, crisp
+      pixels, no shadows
+    pixelize:
+      target_size: 128
+      palette_size: 16
+
+  - entity_id: cook_fire
+    seed: 4005
+    prompt: >-
+      pixel art, 16-bit RPG scene element, open medieval fire pit ringed
+      with grey stones, bright orange and yellow flames, a wooden spit
+      across the top, glowing embers underneath, plain white background,
+      top-down 3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 128
+      palette_size: 16
+
+  - entity_id: vendor_stall
+    seed: 4006
+    prompt: >-
+      pixel art, 16-bit RPG building, covered medieval market vendor stall
+      with a red and white striped awning, a wooden counter loaded with
+      bread loaves apples and bottles, hanging price tags, sturdy wooden
+      posts, plain white background, top-down 3/4 view, crisp pixels, no
+      shadows
+    pixelize:
+      target_size: 128
+      palette_size: 16
+
+  # ------------------------------------------------------------------
+  # Decor — small environmental props scattered around the plaza.
+  # ------------------------------------------------------------------
+  - entity_id: market_barrel
+    seed: 4007
+    prompt: >-
+      pixel art, 16-bit RPG prop, single wooden medieval barrel with iron
+      bands, warm brown wood grain, plain white background, top-down 3/4
+      view, crisp pixels, no shadows
+
+  - entity_id: market_crate
+    seed: 4008
+    prompt: >-
+      pixel art, 16-bit RPG prop, wooden medieval shipping crate with
+      visible plank seams and nails, light brown wood, plain white
+      background, top-down 3/4 view, crisp pixels, no shadows
+
+  - entity_id: market_lantern
+    seed: 4009
+    prompt: >-
+      pixel art, 16-bit RPG prop, hanging medieval iron lantern with warm
+      yellow candle flame inside glass panels, short chain at the top,
+      plain white background, top-down 3/4 view, crisp pixels, no shadows
+
+  - entity_id: market_banner
+    seed: 4010
+    prompt: >-
+      pixel art, 16-bit RPG prop, hanging cloth medieval pennant banner in
+      deep red and gold with a simple heraldic crest, two wooden poles,
+      plain white background, top-down 3/4 view, crisp pixels, no shadows
+
+  - entity_id: market_cart
+    seed: 4011
+    prompt: >-
+      pixel art, 16-bit RPG prop, small empty wooden medieval hand cart
+      with two large spoked wheels and two pull handles, plain white
+      background, top-down 3/4 view, crisp pixels, no shadows
+
+  - entity_id: market_well
+    seed: 4012
+    prompt: >-
+      pixel art, 16-bit RPG prop, stone medieval village well, round
+      mortared grey stones, peaked wooden roof with a hand crank and
+      bucket on a rope, plain white background, top-down 3/4 view, crisp
+      pixels, no shadows
+
+  # ------------------------------------------------------------------
+  # Player — generic adventurer, 4-direction walk + idle.
+  # Pixelize 32 keeps the avatar small relative to stations.
+  # Same outfit/style across every frame for visual consistency.
+  # Outfit locked: green hooded tunic, brown leather belt + boots,
+  # short brown hair, no visible weapons.
+  # ------------------------------------------------------------------
+  - entity_id: adventurer_idle_north
+    seed: 4013
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer standing
+      idle facing away from camera, green hooded tunic, brown leather
+      belt, brown boots, short brown hair, arms relaxed at sides, plain
+      white background, top-down 3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_idle_south
+    seed: 4014
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer standing
+      idle facing the camera, green hooded tunic, brown leather belt,
+      brown boots, short brown hair, arms relaxed at sides, plain white
+      background, top-down 3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_idle_east
+    seed: 4015
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer standing
+      idle facing right in profile, green hooded tunic, brown leather
+      belt, brown boots, short brown hair, arms relaxed at sides, plain
+      white background, top-down 3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_idle_west
+    seed: 4016
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer standing
+      idle facing left in profile, green hooded tunic, brown leather
+      belt, brown boots, short brown hair, arms relaxed at sides, plain
+      white background, top-down 3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_walk_north_a
+    seed: 4017
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer
+      mid-stride facing away from camera with the left foot forward,
+      green hooded tunic, brown leather belt, brown boots, short brown
+      hair, arms swinging, plain white background, top-down 3/4 view,
+      crisp pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_walk_north_b
+    seed: 4018
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer
+      mid-stride facing away from camera with the right foot forward,
+      green hooded tunic, brown leather belt, brown boots, short brown
+      hair, arms swinging, plain white background, top-down 3/4 view,
+      crisp pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_walk_south_a
+    seed: 4019
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer
+      mid-stride facing the camera with the left foot forward, green
+      hooded tunic, brown leather belt, brown boots, short brown hair,
+      arms swinging, plain white background, top-down 3/4 view, crisp
+      pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_walk_south_b
+    seed: 4020
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer
+      mid-stride facing the camera with the right foot forward, green
+      hooded tunic, brown leather belt, brown boots, short brown hair,
+      arms swinging, plain white background, top-down 3/4 view, crisp
+      pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_walk_east_a
+    seed: 4021
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer
+      mid-stride in profile facing right with the leading foot raised,
+      green hooded tunic, brown leather belt, brown boots, short brown
+      hair, arms swinging, plain white background, top-down 3/4 view,
+      crisp pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_walk_east_b
+    seed: 4022
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer
+      mid-stride in profile facing right with the trailing foot raised,
+      green hooded tunic, brown leather belt, brown boots, short brown
+      hair, arms swinging, plain white background, top-down 3/4 view,
+      crisp pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_walk_west_a
+    seed: 4023
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer
+      mid-stride in profile facing left with the leading foot raised,
+      green hooded tunic, brown leather belt, brown boots, short brown
+      hair, arms swinging, plain white background, top-down 3/4 view,
+      crisp pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  - entity_id: adventurer_walk_west_b
+    seed: 4024
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, generic adventurer
+      mid-stride in profile facing left with the trailing foot raised,
+      green hooded tunic, brown leather belt, brown boots, short brown
+      hair, arms swinging, plain white background, top-down 3/4 view,
+      crisp pixels, no shadows
+    pixelize:
+      target_size: 32
+
+  # ------------------------------------------------------------------
+  # Joystick UI — overlay HUD elements.
+  # ------------------------------------------------------------------
+  - entity_id: joystick_base
+    seed: 4025
+    prompt: >-
+      pixel art, 16-bit RPG UI element, circular joystick base, soft dark
+      grey ring with a subtle inner gradient ring, slightly translucent
+      look, plain white background, front view, crisp pixels, no shadows
+    pixelize:
+      target_size: 96
+      palette_size: 12
+
+  - entity_id: joystick_knob
+    seed: 4026
+    prompt: >-
+      pixel art, 16-bit RPG UI element, circular joystick knob, warm gold
+      filled disc with a thin darker gold rim and a small highlight,
+      plain white background, front view, crisp pixels, no shadows
+    pixelize:
+      target_size: 48
+      palette_size: 12
+
+  # ------------------------------------------------------------------
+  # Vendor NPC — single idle frame.
+  # ------------------------------------------------------------------
+  - entity_id: vendor_npc
+    seed: 4027
+    prompt: >-
+      pixel art, 16-bit RPG character sprite, friendly medieval merchant
+      vendor standing idle facing the camera, round face, broad smile,
+      brown apron over a tan shirt, rolled-up sleeves, simple cap, hands
+      on hips, plain white background, top-down 3/4 view, crisp pixels,
+      no shadows
+    pixelize:
+      target_size: 48
+
+  # ------------------------------------------------------------------
+  # Smithing minigame props.
+  # ------------------------------------------------------------------
+  - entity_id: smithy_anvil
+    seed: 4028
+    prompt: >-
+      pixel art, 16-bit RPG prop, classic medieval blacksmith's iron
+      anvil with a wide flat top and pointed horn, set on a dark wooden
+      stump base, plain white background, top-down 3/4 view, crisp
+      pixels, no shadows
+
+  - entity_id: smithy_hammer
+    seed: 4029
+    prompt: >-
+      pixel art, 16-bit RPG prop, blacksmith's hammer with a heavy
+      square iron head and a wrapped brown wooden handle, plain white
+      background, top-down 3/4 view, crisp pixels, no shadows
+
+  - entity_id: smithy_forge_fire
+    seed: 4030
+    prompt: >-
+      pixel art, 16-bit RPG prop, close-up brick forge opening glowing
+      bright orange and yellow with hot coals inside, sparks rising,
+      plain white background, top-down 3/4 view, crisp pixels, no shadows
+
+  - entity_id: smithy_water_bucket
+    seed: 4031
+    prompt: >-
+      pixel art, 16-bit RPG prop, wooden bucket with iron bands filled
+      with blue water reaching the top, slight ripple, simple rope
+      handle, plain white background, top-down 3/4 view, crisp pixels,
+      no shadows
+
+  - entity_id: smithy_sword_cold
+    seed: 4032
+    prompt: >-
+      pixel art, 16-bit RPG prop, unfinished medieval iron sword blade
+      laid flat, dull dark grey metal with a rough surface, simple
+      cross-guard and wrapped brown grip, plain white background, top
+      down view, crisp pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  - entity_id: smithy_sword_hot
+    seed: 4033
+    prompt: >-
+      pixel art, 16-bit RPG prop, medieval iron sword blade laid flat
+      glowing bright orange and yellow from being heated, simple
+      cross-guard and wrapped brown grip, faint heat shimmer, plain
+      white background, top down view, crisp pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  - entity_id: smithy_sword_finished
+    seed: 4034
+    prompt: >-
+      pixel art, 16-bit RPG prop, polished medieval steel sword blade
+      laid flat with bright silver shine and a clean edge, simple
+      cross-guard and wrapped brown grip, plain white background, top
+      down view, crisp pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  # ------------------------------------------------------------------
+  # Runecrafting minigame props.
+  # ------------------------------------------------------------------
+  - entity_id: runic_stone_intact
+    seed: 4035
+    prompt: >-
+      pixel art, 16-bit RPG prop, smooth dark grey magical standing stone
+      shard about head-height, faintly glowing violet runes etched on the
+      surface, no cracks, plain white background, top-down 3/4 view,
+      crisp pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  - entity_id: runic_stone_crack_1
+    seed: 4036
+    prompt: >-
+      pixel art, 16-bit RPG prop, same dark grey magical standing stone
+      shard with a single thin hairline crack running across the
+      surface, faint violet rune glow leaking from the crack, plain
+      white background, top-down 3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  - entity_id: runic_stone_crack_2
+    seed: 4037
+    prompt: >-
+      pixel art, 16-bit RPG prop, same dark grey magical standing stone
+      shard with two visible cracks spreading across the surface,
+      stronger violet rune glow leaking out, small chips falling off,
+      plain white background, top-down 3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  - entity_id: runic_stone_crack_3
+    seed: 4038
+    prompt: >-
+      pixel art, 16-bit RPG prop, same dark grey magical standing stone
+      shard heavily fractured with many bright cracks, vivid violet
+      magical light pouring out, on the verge of bursting, plain white
+      background, top-down 3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  - entity_id: runic_fragment
+    seed: 4039
+    prompt: >-
+      pixel art, 16-bit RPG item sprite, small floating pale violet
+      runestone fragment with carved arcane sigil, soft magical glow
+      around its edge, plain white background, top-down 3/4 view, crisp
+      pixels, no shadows
+
+  # ------------------------------------------------------------------
+  # Herblore minigame props.
+  # ------------------------------------------------------------------
+  - entity_id: herblore_cauldron_empty
+    seed: 4040
+    prompt: >-
+      pixel art, 16-bit RPG prop, black iron cauldron on three short legs
+      standing empty, dark metallic shine, no contents inside, plain
+      white background, top-down 3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  - entity_id: herblore_cauldron_full
+    seed: 4041
+    prompt: >-
+      pixel art, 16-bit RPG prop, black iron cauldron on three short
+      legs filled to the brim with bubbling glowing green potion, a few
+      bubbles rising from the surface, plain white background, top-down
+      3/4 view, crisp pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  - entity_id: herblore_ingredient_potato
+    seed: 4042
+    prompt: >-
+      pixel art, 16-bit RPG item sprite, single brown potato with subtle
+      surface texture and small eyes, oblong shape, plain white
+      background, top-down 3/4 view, crisp pixels, no shadows
+
+  - entity_id: herblore_ingredient_cabbage
+    seed: 4043
+    prompt: >-
+      pixel art, 16-bit RPG item sprite, single round green cabbage with
+      tightly layered leaves and a slight outer leaf curling, plain
+      white background, top-down 3/4 view, crisp pixels, no shadows
+
+  - entity_id: herblore_ingredient_onion
+    seed: 4044
+    prompt: >-
+      pixel art, 16-bit RPG item sprite, single round yellow-brown onion
+      with papery layered skin and a small green sprout on top, plain
+      white background, top-down 3/4 view, crisp pixels, no shadows
+
+  - entity_id: herblore_spoon
+    seed: 4045
+    prompt: >-
+      pixel art, 16-bit RPG prop, long wooden stirring spoon with a deep
+      round bowl and a slightly worn handle, warm brown wood, plain
+      white background, top-down 3/4 view, crisp pixels, no shadows
+
+  # ------------------------------------------------------------------
+  # Cooking minigame props.
+  # ------------------------------------------------------------------
+  - entity_id: cooking_pan
+    seed: 4046
+    prompt: >-
+      pixel art, 16-bit RPG prop, empty cast iron frying pan with a long
+      wooden handle, dark grey interior, plain white background, top
+      down view, crisp pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  - entity_id: cooking_fire_close
+    seed: 4047
+    prompt: >-
+      pixel art, 16-bit RPG prop, close-up small camp fire with two
+      crossed logs, bright orange and yellow flames, glowing red embers
+      underneath, plain white background, top-down 3/4 view, crisp
+      pixels, no shadows
+    pixelize:
+      target_size: 64
+
+  - entity_id: cooking_egg_raw
+    seed: 4048
+    prompt: >-
+      pixel art, 16-bit RPG item sprite, raw cracked egg with a bright
+      yellow yolk in the centre and clear white spreading around it,
+      seen from above as if in a pan, plain white background, top down
+      view, crisp pixels, no shadows
+
+  - entity_id: cooking_egg_cooking
+    seed: 4049
+    prompt: >-
+      pixel art, 16-bit RPG item sprite, cracked egg cooking with the
+      white turning opaque around the edges and still slightly
+      translucent near the bright yellow yolk, seen from above as if in
+      a pan, plain white background, top down view, crisp pixels, no
+      shadows
+
+  - entity_id: cooking_egg_perfect
+    seed: 4050
+    prompt: >-
+      pixel art, 16-bit RPG item sprite, perfectly cooked fried egg, the
+      white fully opaque with a slightly golden crispy edge, glossy
+      orange-yellow yolk in the centre, seen from above as if in a pan,
+      plain white background, top down view, crisp pixels, no shadows
+
+  - entity_id: cooking_egg_burned
+    seed: 4051
+    prompt: >-
+      pixel art, 16-bit RPG item sprite, overcooked burned fried egg,
+      the white edges blackened and charred, dried-out dull yolk in the
+      centre, faint wisp of smoke, seen from above as if in a pan,
+      plain white background, top down view, crisp pixels, no shadows

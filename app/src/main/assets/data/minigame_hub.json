@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "description": "Minigame Hub — medieval market plaza with four crafting stations + a vendor stall. Drives the MinigameHubScreen's MarketCenterStage. Keys here become entity_ids in art_manifest.json and R.drawable.<id> lookups via EntityIcon.",
+
+  "background": {
+    "plaza_floor": {
+      "display_name": "Market Plaza Floor",
+      "description": "Top-down cobblestone ground plate covering the full plaza."
+    }
+  },
+
+  "stations": {
+    "smithy": {
+      "display_name": "Smithy",
+      "description": "Anvil shack with forge chimney. Hosts the smithing minigame.",
+      "skill": "smithing",
+      "minigame": "hammer_and_quench"
+    },
+    "runic_outcrop": {
+      "display_name": "Runic Outcrop",
+      "description": "Standing runestone on an altar slab. Hosts the runecrafting minigame.",
+      "skill": "runecrafting",
+      "minigame": "stone_cracker"
+    },
+    "herbalist_cart": {
+      "display_name": "Herbalist Cart",
+      "description": "Wheeled cart with awning and a bubbling cauldron. Hosts the herblore minigame.",
+      "skill": "herblore",
+      "minigame": "cauldron_mixer"
+    },
+    "cook_fire": {
+      "display_name": "Cook Fire",
+      "description": "Open fire pit with a spit. Hosts the cooking minigame.",
+      "skill": "cooking",
+      "minigame": "egg_on_the_fire"
+    },
+    "vendor_stall": {
+      "display_name": "Vendor Stall",
+      "description": "Covered market stall with goods on display. Opens the in-game shop.",
+      "opens": "shop"
+    }
+  },
+
+  "decor": {
+    "market_barrel": { "display_name": "Barrel" },
+    "market_crate":  { "display_name": "Crate" },
+    "market_lantern":{ "display_name": "Lantern" },
+    "market_banner": { "display_name": "Banner" },
+    "market_cart":   { "display_name": "Hand Cart" },
+    "market_well":   { "display_name": "Well" }
+  },
+
+  "player": {
+    "adventurer_idle_north":  { "display_name": "Adventurer (idle, N)" },
+    "adventurer_idle_south":  { "display_name": "Adventurer (idle, S)" },
+    "adventurer_idle_east":   { "display_name": "Adventurer (idle, E)" },
+    "adventurer_idle_west":   { "display_name": "Adventurer (idle, W)" },
+    "adventurer_walk_north_a":{ "display_name": "Adventurer (walk N, frame A)" },
+    "adventurer_walk_north_b":{ "display_name": "Adventurer (walk N, frame B)" },
+    "adventurer_walk_south_a":{ "display_name": "Adventurer (walk S, frame A)" },
+    "adventurer_walk_south_b":{ "display_name": "Adventurer (walk S, frame B)" },
+    "adventurer_walk_east_a": { "display_name": "Adventurer (walk E, frame A)" },
+    "adventurer_walk_east_b": { "display_name": "Adventurer (walk E, frame B)" },
+    "adventurer_walk_west_a": { "display_name": "Adventurer (walk W, frame A)" },
+    "adventurer_walk_west_b": { "display_name": "Adventurer (walk W, frame B)" }
+  },
+
+  "ui": {
+    "joystick_base": { "display_name": "Joystick Base" },
+    "joystick_knob": { "display_name": "Joystick Knob" }
+  },
+
+  "npcs": {
+    "vendor_npc": { "display_name": "Vendor" }
+  },
+
+  "props": {
+    "smithing": {
+      "smithy_anvil":          { "display_name": "Anvil" },
+      "smithy_hammer":         { "display_name": "Hammer" },
+      "smithy_forge_fire":     { "display_name": "Forge Fire" },
+      "smithy_water_bucket":   { "display_name": "Water Bucket" },
+      "smithy_sword_cold":     { "display_name": "Sword (unfinished)" },
+      "smithy_sword_hot":      { "display_name": "Sword (glowing)" },
+      "smithy_sword_finished": { "display_name": "Sword (finished)" }
+    },
+    "runecrafting": {
+      "runic_stone_intact":  { "display_name": "Runestone (intact)" },
+      "runic_stone_crack_1": { "display_name": "Runestone (crack 1)" },
+      "runic_stone_crack_2": { "display_name": "Runestone (crack 2)" },
+      "runic_stone_crack_3": { "display_name": "Runestone (crack 3)" },
+      "runic_fragment":      { "display_name": "Rune Fragment" }
+    },
+    "herblore": {
+      "herblore_cauldron_empty":     { "display_name": "Cauldron (empty)" },
+      "herblore_cauldron_full":      { "display_name": "Cauldron (full)" },
+      "herblore_ingredient_potato":  { "display_name": "Potato (ingredient)" },
+      "herblore_ingredient_cabbage": { "display_name": "Cabbage (ingredient)" },
+      "herblore_ingredient_onion":   { "display_name": "Onion (ingredient)" },
+      "herblore_spoon":              { "display_name": "Stirring Spoon" }
+    },
+    "cooking": {
+      "cooking_pan":          { "display_name": "Pan" },
+      "cooking_fire_close":   { "display_name": "Cook Fire (close-up)" },
+      "cooking_egg_raw":      { "display_name": "Egg (raw)" },
+      "cooking_egg_cooking":  { "display_name": "Egg (cooking)" },
+      "cooking_egg_perfect":  { "display_name": "Egg (perfect)" },
+      "cooking_egg_burned":   { "display_name": "Egg (burned)" }
+    }
+  }
+}

@@ -75,6 +75,32 @@ def skill_ids() -> list[str]:
     return out
 
 
+def minigame_hub_ids() -> list[str]:
+    """minigame_hub.json shape: a few top-level groups, each a dict of
+    {entity_id: metadata}. The `props` group has a second level keyed by
+    skill. Schema/description keys are ignored. Returns a flat sorted
+    list of every entity id declared in the file.
+    """
+    data = load_json("minigame_hub.json")
+    if not isinstance(data, dict):
+        raise ValueError("Expected dict at minigame_hub.json")
+    skip_keys = {"schema_version", "description"}
+    out: set[str] = set()
+    for group_key, group in data.items():
+        if group_key in skip_keys:
+            continue
+        if not isinstance(group, dict):
+            continue
+        if group_key == "props":
+            # props.<skill>.<entity_id>
+            for skill_group in group.values():
+                if isinstance(skill_group, dict):
+                    out.update(skill_group.keys())
+        else:
+            out.update(group.keys())
+    return sorted(out)
+
+
 # ---------------------------------------------------------------------------
 # Categories — ordered so the markdown reads in dependency order (resources →
 # equipment → enemies → places → meta).
@@ -98,6 +124,7 @@ CATEGORIES: list[tuple[str, str, callable]] = [
     ("Dungeons",      "Dungeon banner art (one per dungeon file).",       lambda: dungeon_ids()),
     ("Agility courses","Agility course banners.",                         lambda: keys_of("agility_courses.json")),
     ("Quests",        "Quest icons.",                                     lambda: keys_of("quests.json")),
+    ("Minigame Hub",  "Market-center plaza, stations, decor, player frames, UI, NPC, minigame props.", lambda: minigame_hub_ids()),
     # Animation-only entities: these are not backed by a JSON data file.
     # They represent the in-world resource nodes that the skill-action Stage
     # targets during Mining animations (the "rock with embedded ore" sprites,
