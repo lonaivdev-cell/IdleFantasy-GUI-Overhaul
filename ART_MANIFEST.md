@@ -4,7 +4,7 @@ Auto-generated from `app/src/main/assets/data/`. Run `python3 scripts/generate_a
 
 Each id below corresponds to the `R.drawable.<id>` the app's `EntityIcon` composable will resolve at runtime. Drop a PNG at `app/src/main/res/drawable-xxhdpi/<id>.png` (and lower densities for crisper rendering) to fill it in.
 
-**Total entities:** 698
+**Total entities:** 749
 
 ---
 
@@ -813,6 +813,64 @@ Count: **103**
 - `woodcutting_4`
 - `woodcutting_5`
 - `woodcutting_6`
+
+## Minigame Hub
+
+_Market-center plaza, stations, decor, player frames, UI, NPC, minigame props._
+
+Count: **51**
+
+- `adventurer_idle_east`
+- `adventurer_idle_north`
+- `adventurer_idle_south`
+- `adventurer_idle_west`
+- `adventurer_walk_east_a`
+- `adventurer_walk_east_b`
+- `adventurer_walk_north_a`
+- `adventurer_walk_north_b`
+- `adventurer_walk_south_a`
+- `adventurer_walk_south_b`
+- `adventurer_walk_west_a`
+- `adventurer_walk_west_b`
+- `cook_fire`
+- `cooking_egg_burned`
+- `cooking_egg_cooking`
+- `cooking_egg_perfect`
+- `cooking_egg_raw`
+- `cooking_fire_close`
+- `cooking_pan`
+- `herbalist_cart`
+- `herblore_cauldron_empty`
+- `herblore_cauldron_full`
+- `herblore_ingredient_cabbage`
+- `herblore_ingredient_onion`
+- `herblore_ingredient_potato`
+- `herblore_spoon`
+- `joystick_base`
+- `joystick_knob`
+- `market_banner`
+- `market_barrel`
+- `market_cart`
+- `market_crate`
+- `market_lantern`
+- `market_well`
+- `plaza_floor`
+- `runic_fragment`
+- `runic_outcrop`
+- `runic_stone_crack_1`
+- `runic_stone_crack_2`
+- `runic_stone_crack_3`
+- `runic_stone_intact`
+- `smithy`
+- `smithy_anvil`
+- `smithy_forge_fire`
+- `smithy_hammer`
+- `smithy_sword_cold`
+- `smithy_sword_finished`
+- `smithy_sword_hot`
+- `smithy_water_bucket`
+- `vendor_npc`
+- `vendor_stall`
 
 ## Scene targets
 
